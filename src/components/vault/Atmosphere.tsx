@@ -12,7 +12,8 @@ export function Atmosphere() {
         style={{
           top: `${6 + p * 10}%`,
           transform: `translateY(${-p * 60}px)`,
-          background: "radial-gradient(circle at 38% 34%, oklch(0.96 0.02 90), oklch(0.74 0.03 90))",
+          background:
+            "radial-gradient(circle at 38% 34%, oklch(0.96 0.02 90), oklch(0.74 0.03 90))",
           boxShadow: "0 0 140px oklch(0.9 0.05 90 / .35)",
         }}
       />
@@ -43,7 +44,13 @@ export function Atmosphere() {
               } as React.CSSProperties
             }
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style={{ animation: "wing .24s ease-in-out infinite" }}>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              style={{ animation: "wing .24s ease-in-out infinite" }}
+            >
               <path d="M2.5 9.5c2 0 3-1.2 4-2.4.2 1.6 1 2.6 2.3 3.1.6-1 1.8-1.6 3.2-1.6s2.6.6 3.2 1.6c1.3-.5 2.1-1.5 2.3-3.1 1 1.2 2 2.4 4 2.4-1.6 1.3-2 3-2 5-1.6-.9-3-.6-4.2.5-1 .9-1.6 2-3.3 2s-2.3-1.1-3.3-2c-1.2-1.1-2.6-1.4-4.2-.5 0-2-.4-3.7-2-5Z" />
             </svg>
           </span>
@@ -55,7 +62,10 @@ export function Atmosphere() {
         <span
           key={`leaf-${i}`}
           className="absolute top-0 block size-2 rounded-[40%_60%_50%_50%] bg-pumpkin/40"
-          style={{ left: `${(i * 11) % 100}%`, animation: `leaf-fall ${11 + (i % 4) * 3}s linear ${i * 1.3}s infinite` }}
+          style={{
+            left: `${(i * 11) % 100}%`,
+            animation: `leaf-fall ${11 + (i % 4) * 3}s linear ${i * 1.3}s infinite`,
+          }}
         />
       ))}
     </div>

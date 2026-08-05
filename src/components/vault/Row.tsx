@@ -39,8 +39,12 @@ export function TitleCard({
             className="size-full object-cover transition-transform duration-700 group-hover:scale-[1.08]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent" />
-          <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-            style={{ background: "radial-gradient(70% 55% at 50% 100%, oklch(0.55 0.24 20 / .45), transparent 70%)" }}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            style={{
+              background:
+                "radial-gradient(70% 55% at 50% 100%, oklch(0.55 0.24 20 / .45), transparent 70%)",
+            }}
           />
           <button
             onClick={() => {
@@ -48,7 +52,11 @@ export function TitleCard({
               onToggleFavorite(item.id);
             }}
             aria-pressed={isFavorite}
-            aria-label={isFavorite ? `Remove ${item.title} from favourites` : `Add ${item.title} to favourites`}
+            aria-label={
+              isFavorite
+                ? `Remove ${item.title} from favourites`
+                : `Add ${item.title} to favourites`
+            }
             className="glass absolute right-3 top-3 grid size-11 place-items-center rounded-full text-moonlight transition-transform hover:scale-110"
           >
             <HeartIcon className={`size-5 ${isFavorite ? "fill-crimson text-crimson" : ""}`} />
@@ -119,8 +127,19 @@ export function Row({
               onClick={() => scroller.current?.scrollBy({ left: dir * 560, behavior: "smooth" })}
               className="glass grid size-11 place-items-center rounded-full text-moonlight transition-transform hover:scale-105"
             >
-              <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                <path d={dir < 0 ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"} strokeLinecap="round" strokeLinejoin="round" />
+              <svg
+                viewBox="0 0 24 24"
+                className="size-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden
+              >
+                <path
+                  d={dir < 0 ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </button>
           ))}

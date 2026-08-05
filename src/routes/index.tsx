@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import heroTown from "@/assets/hero-town.jpg";
 import { PumpkinIntro } from "@/components/vault/PumpkinIntro";
 import { Atmosphere } from "@/components/vault/Atmosphere";
+import { GlassFilters } from "@/components/vault/GlassFilters";
+import { Oracle } from "@/components/vault/Oracle";
 import { Row, TitleCard } from "@/components/vault/Row";
 import {
   CandlesIcon,
@@ -20,6 +22,7 @@ import {
   decades,
   featured,
   sections,
+  searchVault,
   titles,
 } from "@/data/vault";
 import { useFavorites, useReveal } from "@/hooks/use-vault";
@@ -71,15 +74,8 @@ function VaultHome() {
   const picks = useMemo(() => dailyPicks(), []);
 
   const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return titles.filter((t) => {
-      const matchesDecade = !decade || t.decade === decade;
-      if (!q) return matchesDecade;
-      const haystack = [t.title, t.show ?? "", t.description, ...t.genres, ...t.categories]
-        .join(" ")
-        .toLowerCase();
-      return matchesDecade && haystack.includes(q);
-    });
+    const pool = decade ? titles.filter((t) => t.decade === decade) : titles;
+    return searchVault(query, pool);
   }, [query, decade]);
 
   const filtering = query.trim().length > 0 || decade !== null;
@@ -104,6 +100,7 @@ function VaultHome() {
         />
       )}
 
+      <GlassFilters />
       <Atmosphere />
 
       {/* Navigation */}
@@ -112,9 +109,15 @@ function VaultHome() {
           aria-label="Primary"
           className="glass glass-edge glass-sheen mx-auto flex max-w-6xl items-center gap-2 rounded-full px-3 py-2"
         >
-          <a href="#top" onClick={spookClick} className="flex items-center gap-2 rounded-full px-3 py-2 text-moonlight">
+          <a
+            href="#top"
+            onClick={spookClick}
+            className="flex items-center gap-2 rounded-full px-3 py-2 text-moonlight"
+          >
             <HauntedHouseIcon className="size-5 text-pumpkin" />
-            <span className="hidden font-display text-sm tracking-wide sm:inline">The Halloween Vault</span>
+            <span className="hidden font-display text-sm tracking-wide sm:inline">
+              The Halloween Vault
+            </span>
           </a>
 
           <label className="ml-auto flex min-w-0 flex-1 items-center gap-2 rounded-full bg-white/5 px-3 py-2 sm:max-w-xs">
@@ -141,7 +144,11 @@ function VaultHome() {
             aria-label={muted ? "Unmute Halloween ambience" : "Mute Halloween ambience"}
             className="grid size-11 place-items-center rounded-full text-moonlight hover:bg-white/5"
           >
-            {muted ? <SoundOffIcon className="size-5" /> : <SoundOnIcon className="size-5 text-pumpkin" />}
+            {muted ? (
+              <SoundOffIcon className="size-5" />
+            ) : (
+              <SoundOnIcon className="size-5 text-pumpkin" />
+            )}
           </button>
           <button
             onClick={() => {
@@ -172,13 +179,23 @@ function VaultHome() {
                 </ul>
               </div>
               <div>
-                <p className="mb-2 text-xs uppercase tracking-[0.3em] text-pumpkin">Accessibility</p>
+                <p className="mb-2 text-xs uppercase tracking-[0.3em] text-pumpkin">
+                  Accessibility
+                </p>
                 <label className="flex items-center gap-2 py-1">
-                  <input type="checkbox" checked={reducedMotion} onChange={(e) => setReducedMotion(e.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={reducedMotion}
+                    onChange={(e) => setReducedMotion(e.target.checked)}
+                  />
                   Reduced motion
                 </label>
                 <label className="flex items-center gap-2 py-1">
-                  <input type="checkbox" checked={contrast} onChange={(e) => setContrast(e.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={contrast}
+                    onChange={(e) => setContrast(e.target.checked)}
+                  />
                   High contrast
                 </label>
               </div>
@@ -199,7 +216,11 @@ function VaultHome() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/65 to-background/30" />
 
-          <div ref={hero.ref} data-visible={hero.visible} className="reveal relative mx-auto max-w-6xl px-5 pb-20 pt-16 sm:px-10">
+          <div
+            ref={hero.ref}
+            data-visible={hero.visible}
+            className="reveal relative mx-auto max-w-6xl px-5 pb-20 pt-16 sm:px-10"
+          >
             <p className="text-xs uppercase tracking-[0.45em] text-pumpkin">Featured tonight</p>
             <h1 className="ember-glow mt-4 max-w-3xl font-display text-4xl leading-[1.05] text-moonlight sm:text-6xl">
               {featured.title}
@@ -208,7 +229,8 @@ function VaultHome() {
               {featured.description}
             </p>
             <p className="mt-3 text-xs uppercase tracking-[0.2em] text-moonlight/50">
-              {featured.year} · {featured.runtime} · {featured.genres.join(" · ")} · {featured.streaming.join(", ")}
+              {featured.year} · {featured.runtime} · {featured.genres.join(" · ")} ·{" "}
+              {featured.streaming.join(", ")}
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
@@ -235,16 +257,27 @@ function VaultHome() {
 
             {/* Countdown */}
             <div className="glass glass-edge mt-12 inline-flex flex-wrap items-center gap-6 rounded-3xl px-6 py-4">
-              <span className="text-xs uppercase tracking-[0.3em] text-pumpkin">Until Halloween</span>
+              <span className="text-xs uppercase tracking-[0.3em] text-pumpkin">
+                Until Halloween
+              </span>
               <div className="flex gap-5">
-                {([["Days", clock.days], ["Hrs", clock.hours], ["Min", clock.minutes], ["Sec", clock.seconds]] as const).map(
-                  ([label, value]) => (
-                    <div key={label} className="text-center">
-                      <div className="font-display text-2xl text-moonlight tabular-nums">{String(value).padStart(2, "0")}</div>
-                      <div className="text-[0.6rem] uppercase tracking-[0.2em] text-moonlight/50">{label}</div>
+                {(
+                  [
+                    ["Days", clock.days],
+                    ["Hrs", clock.hours],
+                    ["Min", clock.minutes],
+                    ["Sec", clock.seconds],
+                  ] as const
+                ).map(([label, value]) => (
+                  <div key={label} className="text-center">
+                    <div className="font-display text-2xl text-moonlight tabular-nums">
+                      {String(value).padStart(2, "0")}
                     </div>
-                  ),
-                )}
+                    <div className="text-[0.6rem] uppercase tracking-[0.2em] text-moonlight/50">
+                      {label}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -259,16 +292,27 @@ function VaultHome() {
             </h2>
             <div className="row-scroll mt-6 flex gap-5 pb-4">
               {results.map((item) => (
-                <TitleCard key={item.id} item={item} isFavorite={favorites.has(item.id)} onToggleFavorite={favorites.toggle} />
+                <TitleCard
+                  key={item.id}
+                  item={item}
+                  isFavorite={favorites.has(item.id)}
+                  onToggleFavorite={favorites.toggle}
+                />
               ))}
             </div>
           </section>
         )}
 
+        <Oracle />
+
         {/* Daily picks */}
         <section className="mx-auto max-w-6xl px-5 py-16 sm:px-10">
-          <h2 className="font-display text-2xl text-moonlight sm:text-3xl">Today&rsquo;s Halloween pick</h2>
-          <p className="mt-1 text-sm text-moonlight/55">One movie, one episode, one special — new every day of October.</p>
+          <h2 className="font-display text-2xl text-moonlight sm:text-3xl">
+            Today&rsquo;s Halloween pick
+          </h2>
+          <p className="mt-1 text-sm text-moonlight/55">
+            One movie, one episode, one special — new every day of October.
+          </p>
           <div className="mt-6 grid gap-5 sm:grid-cols-3">
             {[
               ["Movie", picks.movie],
@@ -278,7 +322,9 @@ function VaultHome() {
               const t = item as typeof picks.movie;
               return (
                 <div key={t.id} className="glass glass-edge glass-sheen rounded-3xl p-5">
-                  <p className="text-[0.65rem] uppercase tracking-[0.3em] text-pumpkin">{label as string}</p>
+                  <p className="text-[0.65rem] uppercase tracking-[0.3em] text-pumpkin">
+                    {label as string}
+                  </p>
                   <h3 className="mt-2 font-display text-lg text-moonlight">{t.title}</h3>
                   <p className="mt-2 text-xs leading-relaxed text-moonlight/70">{t.description}</p>
                   <p className="mt-3 text-[0.65rem] uppercase tracking-[0.2em] text-moonlight/45">
@@ -298,7 +344,12 @@ function VaultHome() {
             </div>
             <div className="space-y-14">
               {section.rows.map((row) => (
-                <Row key={row.id} row={row} favorites={favorites.ids} onToggleFavorite={favorites.toggle} />
+                <Row
+                  key={row.id}
+                  row={row}
+                  favorites={favorites.ids}
+                  onToggleFavorite={favorites.toggle}
+                />
               ))}
             </div>
           </section>
@@ -341,7 +392,12 @@ function VaultHome() {
           ) : (
             <div className="row-scroll mt-6 flex gap-5 pb-4">
               {favoriteItems.map((item) => (
-                <TitleCard key={item.id} item={item} isFavorite onToggleFavorite={favorites.toggle} />
+                <TitleCard
+                  key={item.id}
+                  item={item}
+                  isFavorite
+                  onToggleFavorite={favorites.toggle}
+                />
               ))}
             </div>
           )}
@@ -349,7 +405,10 @@ function VaultHome() {
       </main>
 
       <footer className="mx-auto max-w-6xl px-5 pb-16 text-xs text-moonlight/45 sm:px-10">
-        <p>The Halloween Vault — a cinematic discovery library for Halloween, horror and autumn entertainment.</p>
+        <p>
+          The Halloween Vault — a cinematic discovery library for Halloween, horror and autumn
+          entertainment.
+        </p>
       </footer>
     </>
   );
