@@ -346,6 +346,210 @@ export const titles: VaultTitle[] = [
   },
 ];
 
+/* ------------------------------------------------------------------ *
+ * Expanded discovery library.
+ *
+ * These entries are matched by keyword/description analysis rather than by
+ * having "Halloween" in the title — costume parties, autumn festivals,
+ * monster nights and October specials all surface through the tag engine.
+ * ------------------------------------------------------------------ */
+interface Seed {
+  id: string;
+  kind: VaultKind;
+  title: string;
+  show?: string;
+  season?: number;
+  episode?: number;
+  year: number;
+  runtime: string;
+  genres: string[];
+  description: string;
+  h: number;
+  f: number;
+  streaming: string[];
+  art: string;
+  categories: string[];
+}
+
+const decadeOf = (year: number) =>
+  year >= 2010 ? "Modern" : `${Math.floor(year / 10) * 10}s`;
+
+const seeds: Seed[] = [
+  { id: "costume-party", kind: "movie", title: "The Costume Party", year: 2016, runtime: "1h 42m", genres: ["Comedy", "Mystery"], description: "A masquerade in an old manor turns into a night of mistaken identities, hidden passages and one very real ghost.", h: 84, f: 61, streaming: ["Prime Video"], art: art.mansion, categories: ["Hidden Gems", "Halloween Comedies", "Haunted Houses"] },
+  { id: "autumn-festival", kind: "movie", title: "Autumn Festival", year: 2019, runtime: "1h 38m", genres: ["Romance", "Drama"], description: "A cider-soaked harvest weekend in Vermont: hay bales, orchard lanterns and a slow-burning October romance.", h: 22, f: 96, streaming: ["Netflix"], art: art.autumn, categories: ["Fall Romance", "Cozy Autumn Movies", "Harvest Themes"] },
+  { id: "monster-night", kind: "movie", title: "Monster Night", year: 2011, runtime: "1h 29m", genres: ["Family", "Adventure"], description: "Every creature in the neighbourhood escapes its storybook on one October evening, and two kids have to write them back in.", h: 88, f: 55, streaming: ["Hulu"], art: art.cartoon, categories: ["Family Halloween", "Monster Movies", "Hidden Gems"] },
+  { id: "haunted-house-hill", kind: "movie", title: "The Haunted House on Wren Hill", year: 1978, runtime: "1h 51m", genres: ["Horror", "Mystery"], description: "A widow inherits a hilltop estate that keeps rearranging its own rooms. Slow, elegant, deeply unsettling.", h: 92, f: 48, streaming: ["Shudder"], art: art.mansion, categories: ["Haunted Houses", "Horror", "Classic Halloween"] },
+  { id: "october-special", kind: "special", title: "The October Special", show: "Midnight Variety", season: 4, episode: 3, year: 1986, runtime: "48m", genres: ["Comedy", "Music"], description: "A live variety hour broadcast from a fog machine and a papier-mâché graveyard. Gloriously of its time.", h: 86, f: 60, streaming: ["Peacock"], art: art.cartoon, categories: ["Cartoon Specials", "Animated Specials", "Hidden Gems"] },
+  { id: "witch-of-birch-lane", kind: "movie", title: "The Witch of Birch Lane", year: 2004, runtime: "1h 44m", genres: ["Fantasy", "Family"], description: "A herbalist at the end of a leafy lane teaches a lonely girl three spells — and one of them shouldn't be spoken.", h: 90, f: 74, streaming: ["Disney+"], art: art.witch, categories: ["Witch Movies", "Family Halloween", "Hidden Gems"] },
+  { id: "cider-mill", kind: "movie", title: "The Cider Mill", year: 2014, runtime: "1h 35m", genres: ["Drama", "Romance"], description: "Two estranged siblings reopen their father's mill through one gold-and-rust New England autumn.", h: 14, f: 97, streaming: ["Prime Video"], art: art.autumn, categories: ["Cozy Autumn Movies", "Harvest Themes", "Fall Romance"] },
+  { id: "graveyard-shift-diner", kind: "movie", title: "Graveyard Shift Diner", year: 1997, runtime: "1h 33m", genres: ["Horror", "Comedy"], description: "A roadside diner between midnight and dawn on October 31st, where every customer is a little bit dead.", h: 94, f: 40, streaming: ["Shudder"], art: art.mansion, categories: ["Halloween Comedies", "Horror", "Hidden Gems"] },
+  { id: "pumpkin-king-parade", kind: "special", title: "The Pumpkin King's Parade", year: 1991, runtime: "26m", genres: ["Animation", "Family"], description: "Stop-motion lanterns march through a papercraft town while a lonely scarecrow finds a crown.", h: 97, f: 78, streaming: ["Max"], art: art.cartoon, categories: ["Animated Specials", "Cartoon Specials", "Pumpkin Season"] },
+  { id: "ghost-of-ash-street", kind: "movie", title: "The Ghost of Ash Street", year: 1963, runtime: "1h 27m", genres: ["Mystery", "Horror"], description: "Black-and-white, whisper-quiet, and still the best staircase shot ever put on film.", h: 89, f: 45, streaming: ["Criterion"], art: art.mansion, categories: ["Classic Halloween", "Haunted Houses", "Horror"] },
+  { id: "trick-or-treat-lane", kind: "episode", title: "Trick or Treat Lane", show: "Maple Street", season: 3, episode: 6, year: 1999, runtime: "22m", genres: ["Comedy"], description: "The whole cul-de-sac competes for best decorated porch. Someone brings a real coffin.", h: 91, f: 66, streaming: ["Hulu"], art: art.cartoon, categories: ["Sitcom Halloween Episodes", "Family Halloween Episodes"] },
+  { id: "midnight-masquerade", kind: "movie", title: "Midnight Masquerade", year: 1988, runtime: "1h 47m", genres: ["Fantasy", "Romance"], description: "At the stroke of twelve every mask in the ballroom comes alive — including the one you're wearing.", h: 87, f: 58, streaming: ["Prime Video"], art: art.witch, categories: ["Witch Movies", "Hidden Gems", "Classic Halloween"] },
+  { id: "scarecrow-field", kind: "movie", title: "Scarecrow Field", year: 1982, runtime: "1h 39m", genres: ["Horror"], description: "Harvest in a Kansas corn maze, and something in row nineteen has started keeping pace with you.", h: 90, f: 82, streaming: ["Shudder"], art: art.autumn, categories: ["Horror", "Harvest Themes", "Monster Movies"] },
+  { id: "coven-cookbook", kind: "movie", title: "The Coven Cookbook", year: 2021, runtime: "1h 41m", genres: ["Comedy", "Fantasy"], description: "Three sisters inherit a bakery whose recipes only work if you read them backwards under a full moon.", h: 85, f: 88, streaming: ["Netflix"], art: art.witch, categories: ["Witch Movies", "Halloween Comedies", "Cozy Autumn Movies"] },
+  { id: "monsters-in-the-attic", kind: "special", title: "Monsters in the Attic", year: 1974, runtime: "24m", genres: ["Animation", "Family"], description: "Hand-painted cels, a gentle werewolf, and a lullaby that has haunted three generations of children.", h: 88, f: 62, streaming: ["Max"], art: art.cartoon, categories: ["Animated Specials", "Monster Movies", "Family Halloween"] },
+  { id: "harvest-moon-inn", kind: "movie", title: "Harvest Moon Inn", year: 2018, runtime: "1h 36m", genres: ["Romance"], description: "A city chef takes over a country inn during peak leaf season and learns to make pie from scratch.", h: 18, f: 95, streaming: ["Netflix"], art: art.autumn, categories: ["Fall Romance", "Cozy Autumn Movies", "Thanksgiving"] },
+  { id: "black-cat-boulevard", kind: "episode", title: "Black Cat Boulevard", show: "Night Shift", season: 2, episode: 4, year: 2013, runtime: "43m", genres: ["Drama", "Mystery"], description: "An October 31st shift where every patient arrives already in costume — and one of them isn't wearing one.", h: 93, f: 50, streaming: ["Hulu"], art: art.mansion, categories: ["Sitcom Halloween Episodes", "Hidden Gems", "Horror"] },
+  { id: "lantern-makers", kind: "movie", title: "The Lantern Makers", year: 2009, runtime: "1h 32m", genres: ["Family", "Fantasy"], description: "A village where every carved pumpkin holds one wish, and the carvers have run out of candles.", h: 95, f: 84, streaming: ["Disney+"], art: art.cartoon, categories: ["Pumpkin Season", "Family Halloween", "Hidden Gems"] },
+  { id: "the-long-october", kind: "movie", title: "The Long October", year: 2022, runtime: "1h 58m", genres: ["Drama", "Mystery"], description: "A small town where the month refuses to end. Sweaters, fog, and a calendar stuck on the 31st.", h: 80, f: 92, streaming: ["Max"], art: art.autumn, categories: ["Hidden Gems", "Cozy Autumn Movies", "Haunted Houses"] },
+  { id: "spellbound-supper", kind: "episode", title: "The Spellbound Supper", show: "Thistle & Thorn", season: 1, episode: 8, year: 2020, runtime: "38m", genres: ["Fantasy", "Comedy"], description: "A witch hosts a dinner party for the recently deceased. Seating arrangements become a nightmare.", h: 89, f: 70, streaming: ["Prime Video"], art: art.witch, categories: ["Witch Movies", "Sitcom Halloween Episodes", "Halloween Comedies"] },
+];
+
+for (const s of seeds) {
+  titles.push({
+    id: s.id,
+    kind: s.kind,
+    title: s.title,
+    show: s.show,
+    season: s.season,
+    episode: s.episode,
+    year: s.year,
+    runtime: s.runtime,
+    genres: s.genres,
+    description: s.description,
+    cast: [],
+    halloweenScore: s.h,
+    fallScore: s.f,
+    streaming: s.streaming,
+    watchUrl: `https://dulo.gd/watch/${s.id}`,
+    art: s.art,
+    categories: s.categories,
+    decade: decadeOf(s.year),
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * Tag engine — seasonal discovery without relying on titles.
+ * ------------------------------------------------------------------ */
+
+export const VAULT_TAGS = [
+  "Halloween",
+  "Fall",
+  "October",
+  "Spooky",
+  "Cozy",
+  "Witch",
+  "Monster",
+  "Ghost",
+  "Pumpkin",
+  "Haunted",
+  "Autumn",
+] as const;
+
+export type VaultTag = (typeof VAULT_TAGS)[number];
+
+const TAG_KEYWORDS: Record<VaultTag, string[]> = {
+  Halloween: ["halloween", "trick or treat", "october 31", "costume", "masquerade", "mask", "candy"],
+  Fall: ["fall", "leaf", "leaves", "cider", "sweater", "orchard", "thanksgiving"],
+  October: ["october", "31st", "midnight", "season"],
+  Spooky: ["spooky", "eerie", "creepy", "unsettling", "chill", "dark", "fog", "shadow"],
+  Cozy: ["cozy", "warm", "inn", "bakery", "pie", "gentle", "lullaby", "romance"],
+  Witch: ["witch", "coven", "spell", "cackle", "broom", "hex", "herbalist", "potion"],
+  Monster: ["monster", "creature", "werewolf", "vampire", "beast", "goblin"],
+  Ghost: ["ghost", "spirit", "haunting", "deceased", "dead", "poltergeist", "phantom"],
+  Pumpkin: ["pumpkin", "jack-o", "lantern", "patch", "carve", "gourd"],
+  Haunted: ["haunted", "manor", "mansion", "estate", "attic", "graveyard", "cemetery", "crypt"],
+  Autumn: ["autumn", "harvest", "corn", "maze", "hay", "amber", "november"],
+};
+
+/** Derives discovery tags from every text signal on a title. */
+export function tagsFor(t: VaultTitle): VaultTag[] {
+  const hay = [t.title, t.show ?? "", t.description, ...t.genres, ...t.categories]
+    .join(" ")
+    .toLowerCase();
+  const found = VAULT_TAGS.filter((tag) => TAG_KEYWORDS[tag].some((k) => hay.includes(k)));
+  if (t.halloweenScore >= 80 && !found.includes("Halloween")) found.push("Halloween");
+  if (t.fallScore >= 85 && !found.includes("Fall")) found.push("Fall");
+  return found;
+}
+
+const tagIndex = new Map<string, VaultTag[]>();
+export function getTags(t: VaultTitle): VaultTag[] {
+  let v = tagIndex.get(t.id);
+  if (!v) {
+    v = tagsFor(t);
+    tagIndex.set(t.id, v);
+  }
+  return v;
+}
+
+/** Semantic-ish search: title, cast, description, genres, categories and tags. */
+export function searchVault(query: string, pool: VaultTitle[] = titles) {
+  const q = query.trim().toLowerCase();
+  if (!q) return pool;
+  const terms = q.split(/\s+/);
+  return pool
+    .map((t) => {
+      const hay = [t.title, t.show ?? "", t.description, ...t.genres, ...t.categories, ...t.cast, ...getTags(t)]
+        .join(" ")
+        .toLowerCase();
+      let score = 0;
+      for (const term of terms) {
+        if (t.title.toLowerCase().includes(term)) score += 6;
+        else if (hay.includes(term)) score += 2;
+      }
+      return { t, score };
+    })
+    .filter((r) => r.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map((r) => r.t);
+}
+
+export function byTag(tag: VaultTag) {
+  return titles.filter((t) => getTags(t).includes(tag));
+}
+
+/* ------------------------------------------------------------------ *
+ * The Halloween Oracle — mood-driven picks.
+ * ------------------------------------------------------------------ */
+
+export type OracleMood = "Scary" | "Funny" | "Family" | "Cozy Fall" | "Classic" | "Animated";
+
+export const ORACLE_MOODS: { mood: OracleMood; blurb: string }[] = [
+  { mood: "Scary", blurb: "Lights off. Doors locked." },
+  { mood: "Funny", blurb: "Screams, but the laughing kind." },
+  { mood: "Family", blurb: "Spooky enough for everyone." },
+  { mood: "Cozy Fall", blurb: "Cider, sweaters, amber light." },
+  { mood: "Classic", blurb: "The canon of October." },
+  { mood: "Animated", blurb: "Cels, puppets and specials." },
+];
+
+const MOOD_MATCH: Record<OracleMood, (t: VaultTitle) => boolean> = {
+  Scary: (t) => t.genres.includes("Horror") || t.categories.includes("Horror") || t.halloweenScore >= 92,
+  Funny: (t) => t.genres.includes("Comedy") || t.categories.includes("Halloween Comedies"),
+  Family: (t) => t.genres.includes("Family") || t.categories.some((c) => c.startsWith("Family")),
+  "Cozy Fall": (t) => t.fallScore >= 80,
+  Classic: (t) => t.year < 1995 || t.categories.includes("Classic Halloween"),
+  Animated: (t) =>
+    t.genres.includes("Animation") ||
+    t.categories.some((c) => c.includes("Animated") || c.includes("Cartoon")),
+};
+
+export interface OracleResult {
+  title: VaultTitle;
+  reason: string;
+}
+
+/** Casts the spell: a weighted random pick with an explanation. */
+export function consultOracle(mood: OracleMood, exclude: string[] = []): OracleResult {
+  const pool = titles.filter((t) => MOOD_MATCH[mood](t) && !exclude.includes(t.id));
+  const source = pool.length ? pool : titles;
+  const title = source[Math.floor(Math.random() * source.length)]!;
+  const tags = getTags(title).slice(0, 3).join(" · ");
+  const reasons: Record<OracleMood, string> = {
+    Scary: `The Oracle scored this ${title.halloweenScore}/100 on the fear meter and refuses to explain further.`,
+    Funny: `Chosen for laughs: ${title.genres.join(", ")} with a fog machine somewhere off-camera.`,
+    Family: `Safe for the whole coven — ${title.runtime}, ${title.year}, and no nightmares promised.`,
+    "Cozy Fall": `A ${title.fallScore}/100 autumn score. The crystal ball smelled like cinnamon.`,
+    Classic: `From ${title.year} — the Oracle keeps this one on the top shelf of the vault.`,
+    Animated: `Drawn, painted or puppeted. The bats voted for this one.`,
+  };
+  return { title, reason: `${reasons[mood]} Tags: ${tags || "Halloween"}.` };
+}
+
+
 export interface VaultRow {
   id: string;
   label: string;
