@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import heroTown from "@/assets/hero-town.jpg";
 import { PumpkinIntro } from "@/components/vault/PumpkinIntro";
 import { Atmosphere } from "@/components/vault/Atmosphere";
+import { GlassFilters } from "@/components/vault/GlassFilters";
+import { Oracle } from "@/components/vault/Oracle";
 import { Row, TitleCard } from "@/components/vault/Row";
 import {
   CandlesIcon,
@@ -20,6 +22,7 @@ import {
   decades,
   featured,
   sections,
+  searchVault,
   titles,
 } from "@/data/vault";
 import { useFavorites, useReveal } from "@/hooks/use-vault";
@@ -71,15 +74,8 @@ function VaultHome() {
   const picks = useMemo(() => dailyPicks(), []);
 
   const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return titles.filter((t) => {
-      const matchesDecade = !decade || t.decade === decade;
-      if (!q) return matchesDecade;
-      const haystack = [t.title, t.show ?? "", t.description, ...t.genres, ...t.categories]
-        .join(" ")
-        .toLowerCase();
-      return matchesDecade && haystack.includes(q);
-    });
+    const pool = decade ? titles.filter((t) => t.decade === decade) : titles;
+    return searchVault(query, pool);
   }, [query, decade]);
 
   const filtering = query.trim().length > 0 || decade !== null;
@@ -104,6 +100,7 @@ function VaultHome() {
         />
       )}
 
+      <GlassFilters />
       <Atmosphere />
 
       {/* Navigation */}
@@ -264,6 +261,8 @@ function VaultHome() {
             </div>
           </section>
         )}
+
+        <Oracle />
 
         {/* Daily picks */}
         <section className="mx-auto max-w-6xl px-5 py-16 sm:px-10">
