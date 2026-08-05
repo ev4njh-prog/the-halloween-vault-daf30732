@@ -131,7 +131,8 @@ export function PumpkinIntro({ onEnter }: Props) {
             animation: phase >= 6 ? "moon-rise 3.5s cubic-bezier(.22,1,.36,1) forwards" : undefined,
             background:
               "radial-gradient(circle at 38% 32%, oklch(0.98 0.02 90), oklch(0.86 0.03 85) 55%, oklch(0.7 0.03 85))",
-            boxShadow: "0 0 180px oklch(0.92 0.06 90 / .5), inset -14px -10px 30px oklch(0.55 0.03 90 / .5)",
+            boxShadow:
+              "0 0 180px oklch(0.92 0.06 90 / .5), inset -14px -10px 30px oklch(0.55 0.03 90 / .5)",
           }}
         />
 
@@ -155,7 +156,14 @@ export function PumpkinIntro({ onEnter }: Props) {
           />
           {/* Warm windows */}
           {[
-            [120, 300], [300, 296], [470, 268], [640, 260], [800, 292], [960, 268], [1130, 300], [1290, 284],
+            [120, 300],
+            [300, 296],
+            [470, 268],
+            [640, 260],
+            [800, 292],
+            [960, 268],
+            [1130, 300],
+            [1290, 284],
           ].map(([x, y], i) => (
             <rect
               key={i}
@@ -234,8 +242,12 @@ export function PumpkinIntro({ onEnter }: Props) {
                 <stop offset="60%" stopColor="#ff6a12" stopOpacity=".28" />
                 <stop offset="100%" stopColor="#ff4a00" stopOpacity="0" />
               </radialGradient>
-              <filter id="bigBlur"><feGaussianBlur stdDeviation="14" /></filter>
-              <filter id="midBlur"><feGaussianBlur stdDeviation="4" /></filter>
+              <filter id="bigBlur">
+                <feGaussianBlur stdDeviation="14" />
+              </filter>
+              <filter id="midBlur">
+                <feGaussianBlur stdDeviation="4" />
+              </filter>
               <clipPath id="bodyClip">
                 <ellipse cx="210" cy="212" rx="168" ry="122" />
               </clipPath>
@@ -250,7 +262,10 @@ export function PumpkinIntro({ onEnter }: Props) {
               fill="url(#halo)"
               opacity={lit ? 1 : 0}
               filter="url(#bigBlur)"
-              style={{ transition: "opacity 1.6s ease", animation: lit ? "flicker 3.8s ease-in-out infinite" : undefined }}
+              style={{
+                transition: "opacity 1.6s ease",
+                animation: lit ? "flicker 3.8s ease-in-out infinite" : undefined,
+              }}
             />
 
             {/* Stem */}
@@ -261,7 +276,14 @@ export function PumpkinIntro({ onEnter }: Props) {
               fill="none"
               strokeLinecap="round"
             />
-            <path d="M206 92c-3-13 4-23 17-27" stroke="#78a84c" strokeWidth="4" fill="none" strokeLinecap="round" opacity=".8" />
+            <path
+              d="M206 92c-3-13 4-23 17-27"
+              stroke="#78a84c"
+              strokeWidth="4"
+              fill="none"
+              strokeLinecap="round"
+              opacity=".8"
+            />
 
             {/* Body with carved skin relief */}
             <g filter="url(#pumpkin-skin)">
@@ -288,7 +310,15 @@ export function PumpkinIntro({ onEnter }: Props) {
                   strokeWidth="2"
                 />
               ))}
-              <ellipse cx="150" cy="150" rx="70" ry="42" fill="#ffb367" opacity=".12" filter="url(#midBlur)" />
+              <ellipse
+                cx="150"
+                cy="150"
+                rx="70"
+                ry="42"
+                fill="#ffb367"
+                opacity=".12"
+                filter="url(#midBlur)"
+              />
             </g>
 
             {/* Inner candle glow bleeding through the rind */}
@@ -300,7 +330,10 @@ export function PumpkinIntro({ onEnter }: Props) {
               fill="url(#innerFire)"
               opacity={phase >= 2 ? (lit ? 0.55 : 0.2) : 0}
               filter="url(#bigBlur)"
-              style={{ transition: "opacity 1.4s ease", animation: phase >= 2 ? "candle-breathe 2.4s ease-in-out infinite" : undefined }}
+              style={{
+                transition: "opacity 1.4s ease",
+                animation: phase >= 2 ? "candle-breathe 2.4s ease-in-out infinite" : undefined,
+              }}
             />
 
             {/* Eyes */}
@@ -313,11 +346,31 @@ export function PumpkinIntro({ onEnter }: Props) {
             >
               <path d="M132 196 178 162 182 210 138 220Z" fill="#fff0b8" />
               <path d="M288 196 242 162 238 210 282 220Z" fill="#fff0b8" />
-              <path d="M132 196 178 162 182 210 138 220Z" fill="#ffb020" opacity=".5" filter="url(#midBlur)" />
-              <path d="M288 196 242 162 238 210 282 220Z" fill="#ffb020" opacity=".5" filter="url(#midBlur)" />
+              <path
+                d="M132 196 178 162 182 210 138 220Z"
+                fill="#ffb020"
+                opacity=".5"
+                filter="url(#midBlur)"
+              />
+              <path
+                d="M288 196 242 162 238 210 282 220Z"
+                fill="#ffb020"
+                opacity=".5"
+                filter="url(#midBlur)"
+              />
               {/* Volumetric light shafts out of the eyes */}
-              <path d="M132 196 178 162 260 60 60 90Z" fill="#ffbe4d" opacity={lit ? 0.1 : 0} filter="url(#bigBlur)" />
-              <path d="M288 196 242 162 160 60 360 90Z" fill="#ffbe4d" opacity={lit ? 0.1 : 0} filter="url(#bigBlur)" />
+              <path
+                d="M132 196 178 162 260 60 60 90Z"
+                fill="#ffbe4d"
+                opacity={lit ? 0.1 : 0}
+                filter="url(#bigBlur)"
+              />
+              <path
+                d="M288 196 242 162 160 60 360 90Z"
+                fill="#ffbe4d"
+                opacity={lit ? 0.1 : 0}
+                filter="url(#bigBlur)"
+              />
             </g>
 
             {/* Nose */}
@@ -338,7 +391,9 @@ export function PumpkinIntro({ onEnter }: Props) {
                 fill="#ff9c1f"
                 opacity=".55"
                 filter="url(#midBlur)"
-                style={{ animation: phase >= 4 ? "candle-breathe 1.6s ease-in-out infinite" : undefined }}
+                style={{
+                  animation: phase >= 4 ? "candle-breathe 1.6s ease-in-out infinite" : undefined,
+                }}
               />
             </g>
           </svg>
@@ -377,7 +432,13 @@ export function PumpkinIntro({ onEnter }: Props) {
                 } as React.CSSProperties
               }
             >
-              <svg width={20 + (i % 4) * 8} height={20 + (i % 4) * 8} viewBox="0 0 24 24" fill="currentColor" style={{ animation: "wing .2s ease-in-out infinite" }}>
+              <svg
+                width={20 + (i % 4) * 8}
+                height={20 + (i % 4) * 8}
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style={{ animation: "wing .2s ease-in-out infinite" }}
+              >
                 <path d="M2.5 9.5c2 0 3-1.2 4-2.4.2 1.6 1 2.6 2.3 3.1.6-1 1.8-1.6 3.2-1.6s2.6.6 3.2 1.6c1.3-.5 2.1-1.5 2.3-3.1 1 1.2 2 2.4 4 2.4-1.6 1.3-2 3-2 5-1.6-.9-3-.6-4.2.5-1 .9-1.6 2-3.3 2s-2.3-1.1-3.3-2c-1.2-1.1-2.6-1.4-4.2-.5 0-2-.4-3.7-2-5Z" />
               </svg>
             </span>
@@ -459,7 +520,10 @@ export function PumpkinIntro({ onEnter }: Props) {
             <p className="text-[0.62rem] uppercase tracking-[0.55em] text-pumpkin">Enter the</p>
             <h1
               className="ember-glow mt-3 font-display text-3xl leading-tight text-moonlight sm:text-5xl"
-              style={{ animation: phase >= 7 ? "title-bloom 1.8s cubic-bezier(.22,1,.36,1) forwards" : undefined }}
+              style={{
+                animation:
+                  phase >= 7 ? "title-bloom 1.8s cubic-bezier(.22,1,.36,1) forwards" : undefined,
+              }}
             >
               THE HALLOWEEN VAULT
             </h1>

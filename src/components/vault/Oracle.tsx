@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { consultOracle, ORACLE_MOODS, type OracleMood, type OracleResult } from "@/data/vault";
-import { crystalChime, drumRoll, magicReveal, pumpkinPop, spellCast, witchLaugh } from "@/lib/ambience";
+import {
+  crystalChime,
+  drumRoll,
+  magicReveal,
+  pumpkinPop,
+  spellCast,
+  witchLaugh,
+} from "@/lib/ambience";
 import { PlayPumpkinIcon } from "./icons";
 
 /** THE HALLOWEEN ORACLE — a magical mood-driven movie picker. */
@@ -45,14 +52,22 @@ export function Oracle() {
               } as React.CSSProperties
             }
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style={{ animation: "wing .25s ease-in-out infinite" }}>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              style={{ animation: "wing .25s ease-in-out infinite" }}
+            >
               <path d="M2.5 9.5c2 0 3-1.2 4-2.4.2 1.6 1 2.6 2.3 3.1.6-1 1.8-1.6 3.2-1.6s2.6.6 3.2 1.6c1.3-.5 2.1-1.5 2.3-3.1 1 1.2 2 2.4 4 2.4-1.6 1.3-2 3-2 5-1.6-.9-3-.6-4.2.5-1 .9-1.6 2-3.3 2s-2.3-1.1-3.3-2c-1.2-1.1-2.6-1.4-4.2-.5 0-2-.4-3.7-2-5Z" />
             </svg>
           </span>
         ))}
 
         <p className="text-[0.65rem] uppercase tracking-[0.5em] text-pumpkin">Step inside</p>
-        <h2 className="ember-glow mt-3 font-display text-3xl text-moonlight sm:text-5xl">THE HALLOWEEN ORACLE</h2>
+        <h2 className="ember-glow mt-3 font-display text-3xl text-moonlight sm:text-5xl">
+          THE HALLOWEEN ORACLE
+        </h2>
         <p className="mt-3 max-w-lg text-sm text-moonlight/70">
           Choose your mood, cast the spell, and let the crystal ball decide what you watch tonight.
         </p>
@@ -69,7 +84,10 @@ export function Oracle() {
                 <span
                   key={i}
                   className="absolute left-1/2 top-0 -translate-x-1/2 text-pumpkin/70"
-                  style={{ transform: `rotate(${i * 60}deg) translateY(-2px)`, transformOrigin: "0 128px" }}
+                  style={{
+                    transform: `rotate(${i * 60}deg) translateY(-2px)`,
+                    transformOrigin: "0 128px",
+                  }}
                 >
                   {r}
                 </span>
@@ -82,7 +100,9 @@ export function Oracle() {
                   "radial-gradient(circle at 34% 28%, oklch(0.95 0.03 300 / .6), oklch(0.5 0.18 20 / .5) 45%, oklch(0.18 0.08 305 / .9) 78%)",
                 boxShadow:
                   "inset -18px -22px 50px oklch(0.05 0.02 300 / .8), inset 14px 16px 40px oklch(1 0 0 / .25), 0 0 90px oklch(0.55 0.24 20 / .5)",
-                animation: casting ? "orb-swirl 1.1s ease-in-out infinite" : "orb-swirl 7s ease-in-out infinite",
+                animation: casting
+                  ? "orb-swirl 1.1s ease-in-out infinite"
+                  : "orb-swirl 7s ease-in-out infinite",
               }}
             >
               {casting &&
@@ -103,7 +123,10 @@ export function Oracle() {
                 ))}
             </div>
             {/* Pedestal */}
-            <div aria-hidden className="absolute -bottom-2 h-6 w-40 rounded-[50%] bg-black/70 blur-md" />
+            <div
+              aria-hidden
+              className="absolute -bottom-2 h-6 w-40 rounded-[50%] bg-black/70 blur-md"
+            />
           </div>
 
           {/* Controls */}
@@ -153,9 +176,12 @@ export function Oracle() {
                 <div>
                   <h3 className="font-display text-xl text-moonlight">{result.title.title}</h3>
                   <p className="mt-1 text-xs uppercase tracking-[0.18em] text-moonlight/50">
-                    {result.title.year} · {result.title.runtime} · {result.title.streaming.join(", ")}
+                    {result.title.year} · {result.title.runtime} ·{" "}
+                    {result.title.streaming.join(", ")}
                   </p>
-                  <p className="mt-3 text-sm leading-relaxed text-moonlight/75">{result.title.description}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-moonlight/75">
+                    {result.title.description}
+                  </p>
                   <p className="mt-3 text-xs leading-relaxed text-pumpkin">{result.reason}</p>
                   <div className="mt-4 flex flex-wrap gap-3">
                     <a

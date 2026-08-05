@@ -120,7 +120,7 @@ export function startAmbience() {
     const o = c.createOscillator();
     o.type = i === 3 ? "sine" : "triangle";
     o.frequency.value = f;
-    o.detune.value = (i % 2 ? 6 : -6);
+    o.detune.value = i % 2 ? 6 : -6;
     const g = c.createGain();
     g.gain.value = 0.022 / (i + 1);
     const lp = c.createBiquadFilter();
