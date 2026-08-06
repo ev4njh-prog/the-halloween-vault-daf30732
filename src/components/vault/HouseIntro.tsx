@@ -302,7 +302,7 @@ export function HouseIntro({ onEnter }: { onEnter: (withSound: boolean) => void 
       setPhase("title");
       magicReveal();
     });
-    at(9200, finish);
+    at(11400, finish);
 
     const skip = (e: KeyboardEvent) => {
       if (e.key === "Escape" || e.key === "Enter" || e.key === " ") finish();
