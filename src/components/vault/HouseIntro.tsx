@@ -183,11 +183,11 @@ const PIECES: Piece[] = [
     fr: "-12deg",
     el: (
       <g fill="none" stroke="oklch(0.3 0.04 30 / .85)" strokeWidth="2">
-        <rect x="250" y="336" width="54" height="72" rx="26" />
-        <rect x="372" y="336" width="56" height="72" rx="27" />
-        <rect x="496" y="336" width="54" height="72" rx="26" />
-        <rect x="146" y="322" width="50" height="66" rx="24" />
-        <rect x="606" y="306" width="50" height="66" rx="24" />
+        <path d="M250 362a27 27 0 0 1 54 0v46h-54Z" />
+        <path d="M372 364a28 28 0 0 1 56 0v44h-56Z" />
+        <path d="M496 362a27 27 0 0 1 54 0v46h-54Z" />
+        <path d="M146 346a25 25 0 0 1 50 0v42h-50Z" />
+        <path d="M606 330a25 25 0 0 1 50 0v42h-50Z" />
       </g>
     ),
   },
@@ -258,13 +258,13 @@ const PIECES: Piece[] = [
   },
 ];
 
-const WINDOWS = [
-  { x: 250, y: 336, w: 54, h: 72, r: 26 },
-  { x: 372, y: 336, w: 56, h: 72, r: 27 },
-  { x: 496, y: 336, w: 54, h: 72, r: 26 },
-  { x: 146, y: 322, w: 50, h: 66, r: 24 },
-  { x: 606, y: 306, w: 50, h: 66, r: 24 },
-];
+const WINDOW_PATHS = [
+  "M255 363a22 22 0 0 1 44 0v40h-44Z",
+  "M377 365a23 23 0 0 1 46 0v38h-46Z",
+  "M501 363a22 22 0 0 1 44 0v40h-44Z",
+  "M151 347a20 20 0 0 1 40 0v36h-40Z",
+  "M611 331a20 20 0 0 1 40 0v36h-40Z",
+] as const;
 
 type Phase = "build" | "ignite" | "title" | "exit";
 
@@ -368,12 +368,12 @@ export function HouseIntro({ onEnter }: { onEnter: (withSound: boolean) => void 
           <svg viewBox="0 0 800 620" className="w-full drop-shadow-[0_40px_80px_oklch(0.05_0.02_300)]">
             <defs>
               <radialGradient id="hv-window" cx="50%" cy="45%" r="65%">
-                <stop offset="0%" stopColor="oklch(0.62 0.22 25)" />
-                <stop offset="55%" stopColor="oklch(0.42 0.19 22)" />
+                <stop offset="0%" stopColor="oklch(0.5 0.19 25)" />
+                <stop offset="55%" stopColor="oklch(0.34 0.16 22)" />
                 <stop offset="100%" stopColor="oklch(0.18 0.1 18)" />
               </radialGradient>
               <filter id="hv-window-glow" x="-120%" y="-120%" width="340%" height="340%">
-                <feGaussianBlur stdDeviation="10" result="b" />
+                <feGaussianBlur stdDeviation="7" result="b" />
                 <feMerge>
                   <feMergeNode in="b" />
                   <feMergeNode in="SourceGraphic" />
@@ -402,14 +402,10 @@ export function HouseIntro({ onEnter }: { onEnter: (withSound: boolean) => void 
             {/* Window glass — ignites after the build */}
             {lit && (
               <g filter="url(#hv-window-glow)">
-                {WINDOWS.map((w, i) => (
-                  <rect
+                {WINDOW_PATHS.map((d, i) => (
+                  <path
                     key={i}
-                    x={w.x + 4}
-                    y={w.y + 4}
-                    width={w.w - 8}
-                    height={w.h - 8}
-                    rx={w.r}
+                    d={d}
                     fill="url(#hv-window)"
                     style={{
                       opacity: 0,
@@ -421,7 +417,7 @@ export function HouseIntro({ onEnter }: { onEnter: (withSound: boolean) => void 
                 ))}
                 <path
                   d="M368 476q32-46 64 0v66h-64Z"
-                  fill="oklch(0.42 0.2 24 / .55)"
+                  fill="oklch(0.34 0.17 24 / .45)"
                   style={{ opacity: 0, animation: "window-ignite 2s ease-out 1s forwards" }}
                 />
               </g>
@@ -433,7 +429,7 @@ export function HouseIntro({ onEnter }: { onEnter: (withSound: boolean) => void 
             {phase !== "build" && phase !== "ignite" && (
               <div className="relative mx-auto w-fit overflow-hidden px-2">
                 <h1
-                  className="relative bg-clip-text font-display text-[clamp(1.35rem,5.2vw,3rem)] uppercase leading-none text-transparent"
+                  className="relative whitespace-nowrap bg-clip-text text-center font-display text-[clamp(1rem,4.2vw,2.5rem)] uppercase leading-none text-transparent"
                   style={{
                     backgroundImage:
                       "linear-gradient(180deg, oklch(0.92 0.05 30), oklch(0.62 0.22 25) 52%, oklch(0.36 0.15 20))",

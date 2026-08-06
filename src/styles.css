@@ -533,7 +533,7 @@
   }
   100% {
     opacity: 1;
-    letter-spacing: 0.32em;
+    letter-spacing: 0.22em;
     filter: blur(0);
     transform: scale(1);
   }
