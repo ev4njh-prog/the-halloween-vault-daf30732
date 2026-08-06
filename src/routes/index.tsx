@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import heroTown from "@/assets/hero-town.jpg";
-import { PumpkinIntro } from "@/components/vault/PumpkinIntro";
+import { HouseIntro } from "@/components/vault/HouseIntro";
 import { Atmosphere } from "@/components/vault/Atmosphere";
 import { GlassFilters } from "@/components/vault/GlassFilters";
 import { Oracle } from "@/components/vault/Oracle";
@@ -59,12 +59,14 @@ function VaultHome() {
   const [contrast, setContrast] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const favorites = useFavorites();
-  const [clock, setClock] = useState(() => countdownToHalloween());
+  const [clock, setClock] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
+    setClock(countdownToHalloween());
     const t = window.setInterval(() => setClock(countdownToHalloween()), 1000);
     return () => window.clearInterval(t);
   }, []);
+
 
   useEffect(() => {
     document.documentElement.classList.toggle("vault-reduced-motion", reducedMotion);
@@ -92,13 +94,14 @@ function VaultHome() {
   return (
     <>
       {!entered && (
-        <PumpkinIntro
+        <HouseIntro
           onEnter={(withSound) => {
             setEntered(true);
             setMuted(!withSound);
           }}
         />
       )}
+
 
       <GlassFilters />
       <Atmosphere />
