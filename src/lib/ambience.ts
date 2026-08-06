@@ -515,3 +515,154 @@ export function magicReveal() {
   });
   window.setTimeout(() => crystalChime(), 220);
 }
+
+/* ------------------------------------------------------------------ */
+/* Haunted-house rebuild intro sound design                            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Try to start the ambience without a gesture. If the browser blocks it,
+ * arm one-time listeners so audio fades in the moment the user interacts.
+ */
+export function tryAutoStartAmbience() {
+  if (typeof window === "undefined") return;
+  const attempt = () => {
+    startAmbience();
+    return ctx?.state === "running";
+  };
+  if (attempt()) return;
+  const events = ["pointerdown", "keydown", "touchstart", "wheel"] as const;
+  const onGesture = () => {
+    events.forEach((e) => window.removeEventListener(e, onGesture));
+    startAmbience();
+  };
+  events.forEach((e) => window.addEventListener(e, onGesture, { once: true, passive: true }));
+}
+
+/** Long reversed magical swell — a piece of the house flying home. */
+export function reverseWhoosh(seconds = 0.9, level = 0.5) {
+  const c = sfx();
+  if (!c) return;
+  const t = c.currentTime;
+  const n = c.createBufferSource();
+  n.buffer = noiseBuffer(c, seconds + 0.2);
+  const bp = c.createBiquadFilter();
+  bp.type = "bandpass";
+  bp.Q.value = 1.4;
+  bp.frequency.setValueAtTime(220, t);
+  bp.frequency.exponentialRampToValueAtTime(2600, t + seconds);
+  const g = c.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.09 * level, t + seconds * 0.92);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + seconds + 0.12);
+  n.connect(bp).connect(g);
+  send(g, 0.9);
+  n.start(t);
+  n.stop(t + seconds + 0.2);
+}
+
+/** Dry supernatural thunk as a timber locks into place. */
+export function woodLock(level = 0.5) {
+  const c = sfx();
+  if (!c) return;
+  const t = c.currentTime;
+  const o = c.createOscillator();
+  o.type = "triangle";
+  o.frequency.setValueAtTime(190 + Math.random() * 60, t);
+  o.frequency.exponentialRampToValueAtTime(58, t + 0.16);
+  const g = c.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.22 * level, t + 0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+  o.connect(g);
+  send(g, 0.5);
+  o.start(t);
+  o.stop(t + 0.32);
+
+  const n = c.createBufferSource();
+  n.buffer = noiseBuffer(c, 0.3);
+  const hp = c.createBiquadFilter();
+  hp.type = "bandpass";
+  hp.frequency.value = 1500 + Math.random() * 900;
+  hp.Q.value = 2;
+  const ng = c.createGain();
+  ng.gain.setValueAtTime(0.08 * level, t);
+  ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+  n.connect(hp).connect(ng);
+  send(ng, 0.8);
+  n.start(t);
+  n.stop(t + 0.3);
+}
+
+/** Rusted chains swinging in the dark. */
+export function chainRattle(level = 0.4) {
+  const c = sfx();
+  if (!c) return;
+  const t0 = c.currentTime;
+  for (let i = 0; i < 9; i++) {
+    const t = t0 + i * (0.05 + Math.random() * 0.07);
+    const n = c.createBufferSource();
+    n.buffer = noiseBuffer(c, 0.2);
+    const bp = c.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 2600 + Math.random() * 2600;
+    bp.Q.value = 12;
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.05 * level * (1 - i / 12), t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+    n.connect(bp).connect(g);
+    send(g, 1);
+    n.start(t);
+    n.stop(t + 0.16);
+  }
+}
+
+/** Deep house groan — the structure waking up. */
+export function houseGroan(level = 0.6) {
+  const c = sfx();
+  if (!c) return;
+  const t = c.currentTime;
+  const o = c.createOscillator();
+  o.type = "sawtooth";
+  o.frequency.setValueAtTime(52, t);
+  o.frequency.linearRampToValueAtTime(41, t + 2.4);
+  const lp = c.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.value = 320;
+  const g = c.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(0.13 * level, t + 0.8);
+  g.gain.linearRampToValueAtTime(0.0001, t + 2.6);
+  const wob = c.createOscillator();
+  wob.frequency.value = 5.5;
+  const wobG = c.createGain();
+  wobG.gain.value = 0.045 * level;
+  wob.connect(wobG).connect(g.gain);
+  o.connect(lp).connect(g);
+  send(g, 0.9);
+  o.start(t);
+  wob.start(t);
+  o.stop(t + 2.7);
+  wob.stop(t + 2.7);
+}
+
+/** Windows igniting — slow supernatural bloom. */
+export function emberIgnite() {
+  const c = sfx();
+  if (!c) return;
+  const t = c.currentTime;
+  [98, 147, 233, 311].forEach((f, i) => {
+    const o = c.createOscillator();
+    o.type = "sine";
+    o.frequency.setValueAtTime(f * 0.7, t + i * 0.12);
+    o.frequency.exponentialRampToValueAtTime(f, t + 1.6 + i * 0.12);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t + i * 0.12);
+    g.gain.exponentialRampToValueAtTime(0.1, t + 0.9 + i * 0.12);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 3.2);
+    o.connect(g);
+    send(g, 1);
+    o.start(t + i * 0.12);
+    o.stop(t + 3.4);
+  });
+}
