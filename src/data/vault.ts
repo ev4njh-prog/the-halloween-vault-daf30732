@@ -2,6 +2,7 @@ import artWitch from "@/assets/art-witch.jpg";
 import artMansion from "@/assets/art-mansion.jpg";
 import artAutumn from "@/assets/art-autumn.jpg";
 import artCartoon from "@/assets/art-cartoon.jpg";
+import { scoresOf } from "./seasonal";
 
 export type VaultKind = "movie" | "episode" | "special";
 
