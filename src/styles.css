@@ -57,40 +57,44 @@
 
 :root {
   --radius: 1rem;
-  --background: oklch(0.11 0.025 300);
-  --foreground: oklch(0.96 0.01 300);
-  --card: oklch(0.16 0.045 320);
-  --card-foreground: oklch(0.96 0.01 300);
-  --popover: oklch(0.14 0.04 320);
-  --popover-foreground: oklch(0.96 0.01 300);
+  --background: oklch(0.09 0.022 305);
+  --foreground: oklch(0.96 0.008 300);
+  --card: oklch(0.15 0.04 318);
+  --card-foreground: oklch(0.96 0.008 300);
+  --popover: oklch(0.13 0.038 318);
+  --popover-foreground: oklch(0.96 0.008 300);
   --primary: oklch(0.52 0.22 22);
   --primary-foreground: oklch(0.98 0.01 60);
-  --secondary: oklch(0.24 0.07 315);
+  --secondary: oklch(0.22 0.065 315);
   --secondary-foreground: oklch(0.95 0.01 300);
-  --muted: oklch(0.2 0.05 310);
-  --muted-foreground: oklch(0.75 0.03 310);
+  --muted: oklch(0.19 0.045 310);
+  --muted-foreground: oklch(0.74 0.025 305);
   --accent: oklch(0.72 0.18 55);
   --accent-foreground: oklch(0.15 0.03 40);
   --destructive: oklch(0.58 0.24 27);
   --destructive-foreground: oklch(0.98 0.01 60);
-  --border: oklch(0.62 0.2 22 / 28%);
-  --input: oklch(0.62 0.2 22 / 22%);
+  --border: oklch(0.62 0.2 22 / 24%);
+  --input: oklch(0.62 0.2 22 / 20%);
   --ring: oklch(0.62 0.22 22 / 60%);
 
-  --crimson: oklch(0.55 0.24 20);
-  --blood: oklch(0.36 0.19 22);
-  --pumpkin: oklch(0.74 0.18 58);
-  --midnight: oklch(0.19 0.08 305);
-  --moonlight: oklch(0.93 0.02 280);
+  --crimson: oklch(0.56 0.24 20);
+  --blood: oklch(0.34 0.19 22);
+  --pumpkin: oklch(0.75 0.18 58);
+  --midnight: oklch(0.18 0.075 305);
+  --moonlight: oklch(0.94 0.012 300);
+
+  /* Spacing rhythm for section hierarchy */
+  --space-section: clamp(3.5rem, 7vw, 7rem);
+  --space-gutter: clamp(1.25rem, 4vw, 3.5rem);
 
   --gradient-night: radial-gradient(
-      120% 90% at 50% -10%,
-      oklch(0.28 0.11 315 / 0.85),
-      transparent 60%
+      110% 80% at 50% -10%,
+      oklch(0.26 0.1 318 / 0.8),
+      transparent 62%
     ),
-    linear-gradient(180deg, oklch(0.11 0.03 300), oklch(0.07 0.02 300));
+    linear-gradient(180deg, oklch(0.1 0.028 305), oklch(0.06 0.018 305));
   --gradient-ember: linear-gradient(135deg, var(--crimson), var(--pumpkin));
-  --shadow-ruby: 0 24px 70px -24px oklch(0.55 0.24 20 / 0.65);
+  --shadow-ruby: 0 24px 70px -24px oklch(0.55 0.24 20 / 0.45);
   --shadow-lift: 0 40px 90px -40px oklch(0 0 0 / 0.9);
 }
 
