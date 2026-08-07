@@ -54,12 +54,12 @@ export function mergeRecords(records: SourceRecord[]): SourceRecord | null {
   const ordered = [...records].sort((a, b) => b.confidence - a.confidence);
   const base = { ...ordered[0]! };
   for (const r of ordered.slice(1)) {
-    base.overview ||= r.overview;
-    base.runtime ||= r.runtime;
-    base.posterUrl ||= r.posterUrl;
-    base.backdropUrl ||= r.backdropUrl;
-    base.year ??= r.year;
-    base.episode ??= r.episode;
+    if (!base.overview && r.overview) base.overview = r.overview;
+    if (!base.runtime && r.runtime) base.runtime = r.runtime;
+    if (!base.posterUrl && r.posterUrl) base.posterUrl = r.posterUrl;
+    if (!base.backdropUrl && r.backdropUrl) base.backdropUrl = r.backdropUrl;
+    if (base.year === undefined && r.year !== undefined) base.year = r.year;
+    if (!base.episode && r.episode) base.episode = r.episode;
     base.genres = [...new Set([...(base.genres ?? []), ...(r.genres ?? [])])];
     base.keywords = [...new Set([...(base.keywords ?? []), ...(r.keywords ?? [])])];
     base.cast = [...new Set([...(base.cast ?? []), ...(r.cast ?? [])])];
