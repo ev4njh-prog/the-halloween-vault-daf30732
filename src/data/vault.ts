@@ -169,3 +169,57 @@ export function consultOracle(mood: OracleMood, excludeIds: string[] = []): Orac
     matchedScoreKey: targetMetric,
   };
 }
+// Legacy frontend compatibility exports
+
+export const countdownToHalloween = () => {
+  const halloween = new Date(new Date().getFullYear(), 9, 31);
+  const now = new Date();
+
+  if (now > halloween) {
+    halloween.setFullYear(halloween.getFullYear() + 1);
+  }
+
+  const diff = halloween.getTime() - now.getTime();
+
+  return {
+    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((diff / (1000 * 60)) % 60),
+    seconds: Math.floor((diff / 1000) % 60),
+  };
+};
+
+
+export const dailyPicks = masterVaultStore.slice(0, 5);
+
+
+export const decades = [
+  ...new Set(masterVaultStore.map((title) => title.decade))
+];
+
+
+export const sections = [
+  {
+    title: "Featured Halloween",
+    items: masterVaultStore.filter(
+      (title) => title.intentScores.halloweenIntensity >= 70
+    ),
+  },
+  {
+    title: "Cozy Fall",
+    items: masterVaultStore.filter(
+      (title) => title.intentScores.cozyAutumn >= 50
+    ),
+  },
+  {
+    title: "Scary Picks",
+    items: masterVaultStore.filter(
+      (title) => title.intentScores.spookyLevel >= 50
+    ),
+  },
+];
+
+
+export async function searchVault(query: string) {
+  return queryVault({ query }).then((result) => result.results);
+}
