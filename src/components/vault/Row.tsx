@@ -1,14 +1,15 @@
-import { useRef } from "react";
+import { memo, useRef } from "react";
 import { toast } from "sonner";
 import type { VaultTitle, VaultRow } from "@/data/vault";
+import { scoresOf, tagsOf } from "@/data/seasonal";
+import { artworkFallback } from "@/data/sources";
 import { HeartIcon, PlayPumpkinIcon } from "./icons";
-import { spookClick, magicSparkle } from "@/lib/ambience";
+import { spookClick } from "@/lib/ambience";
 import { useReveal } from "@/hooks/use-vault";
 
 function watch(item: VaultTitle) {
   spookClick();
   if (item.watchUrl) {
-    magicSparkle();
     window.open(item.watchUrl, "_blank", "noopener,noreferrer");
   } else {
     toast("Streaming location unavailable", {
@@ -17,35 +18,40 @@ function watch(item: VaultTitle) {
   }
 }
 
-export function TitleCard({
+export const TitleCard = memo(function TitleCard({
   item,
   isFavorite,
   onToggleFavorite,
+  priority = false,
 }: {
   item: VaultTitle;
   isFavorite: boolean;
   onToggleFavorite: (id: string) => void;
+  priority?: boolean;
 }) {
+  const scores = scoresOf(item);
+  const tags = tagsOf(item).slice(0, 3);
+
   return (
-    <article className="group relative w-[240px] shrink-0 snap-start sm:w-[268px]">
-      <div className="glass glass-edge glass-sheen overflow-hidden rounded-3xl transition-all duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-2 group-hover:scale-[1.03] group-focus-within:-translate-y-2">
-        <div className="relative aspect-2/3 overflow-hidden">
+    <article className="group relative w-[190px] shrink-0 snap-start sm:w-[228px]">
+      <div className="glass glass-edge overflow-hidden rounded-2xl transition-transform duration-300 ease-out will-change-transform group-hover:-translate-y-1.5 group-focus-within:-translate-y-1.5">
+        <div className="relative aspect-2/3 overflow-hidden bg-midnight">
           <img
             src={item.art}
             alt={`Artwork for ${item.title}`}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            decoding="async"
+            onError={artworkFallback(item.art)}
             width={640}
             height={960}
-            className="size-full object-cover transition-transform duration-700 group-hover:scale-[1.08]"
+            className="size-full object-cover transition-transform duration-500 will-change-transform group-hover:scale-[1.05]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent" />
-          <div
-            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-            style={{
-              background:
-                "radial-gradient(70% 55% at 50% 100%, oklch(0.55 0.24 20 / .45), transparent 70%)",
-            }}
-          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+
+          <span className="absolute left-2.5 top-2.5 rounded-full bg-background/70 px-2 py-1 text-[0.6rem] font-semibold tracking-[0.12em] text-pumpkin">
+            {scores.overall}
+          </span>
+
           <button
             onClick={() => {
               spookClick();
@@ -54,51 +60,52 @@ export function TitleCard({
             aria-pressed={isFavorite}
             aria-label={
               isFavorite
-                ? `Remove ${item.title} from favourites`
-                : `Add ${item.title} to favourites`
+                ? `Remove ${item.title} from your vault`
+                : `Save ${item.title} to your vault`
             }
-            className="glass absolute right-3 top-3 grid size-11 place-items-center rounded-full text-moonlight transition-transform hover:scale-110"
+            className="absolute right-2 top-2 grid size-9 place-items-center rounded-full bg-background/65 text-moonlight transition-colors hover:bg-background/85"
           >
-            <HeartIcon className={`size-5 ${isFavorite ? "fill-crimson text-crimson" : ""}`} />
+            <HeartIcon className={`size-4 ${isFavorite ? "fill-crimson text-crimson" : ""}`} />
           </button>
-
-          <div className="absolute inset-x-0 bottom-0 p-4">
-            <h3 className="font-display text-base leading-snug text-moonlight">{item.title}</h3>
-            <p className="mt-1 text-xs text-moonlight/60">
-              {item.show ? `${item.show} · S${item.season}E${item.episode} · ` : ""}
-              {item.year} · {item.runtime} · {item.genres[0]}
-            </p>
-          </div>
         </div>
 
-        <div className="max-h-0 overflow-hidden px-4 opacity-0 transition-all duration-500 group-hover:max-h-56 group-hover:pb-4 group-hover:opacity-100 group-focus-within:max-h-56 group-focus-within:pb-4 group-focus-within:opacity-100">
-          <p className="pt-3 text-xs leading-relaxed text-moonlight/75">{item.description}</p>
-          <p className="mt-2 text-[0.68rem] uppercase tracking-[0.18em] text-pumpkin">
-            {item.streaming.join(" · ")}
+        <div className="p-3">
+          <h3 className="truncate font-display text-[0.95rem] font-semibold leading-tight text-moonlight">
+            {item.title}
+          </h3>
+          <p className="mt-1 truncate text-[0.68rem] text-moonlight/55">
+            {item.show ? `${item.show} · S${item.season}E${item.episode} · ` : ""}
+            {item.year} · {item.runtime}
           </p>
+          <p className="mt-1.5 truncate text-[0.62rem] uppercase tracking-[0.14em] text-pumpkin/80">
+            {(tags.length ? tags : item.genres).join(" · ")}
+          </p>
+
+          {/* Expansion: kept inside the card so rows never reflow the page. */}
+          <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-hover:grid-rows-[1fr] group-focus-within:grid-rows-[1fr]">
+            <div className="overflow-hidden">
+              <p className="pt-2 text-[0.7rem] leading-relaxed text-moonlight/70 line-clamp-3">
+                {item.description}
+              </p>
+              <p className="mt-2 text-[0.62rem] uppercase tracking-[0.14em] text-moonlight/45">
+                {item.streaming.join(" · ")}
+              </p>
+            </div>
+          </div>
+
           <button
             onClick={() => watch(item)}
-            className="glass glass-edge mt-3 flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-xs font-semibold text-moonlight transition-transform hover:scale-[1.02]"
+            className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-full bg-crimson/85 text-xs font-semibold text-moonlight transition-colors hover:bg-crimson"
           >
-            <PlayPumpkinIcon className="size-4" /> Watch now
+            <PlayPumpkinIcon className="size-4" /> Watch
           </button>
         </div>
-      </div>
-
-      {/* Always-visible mobile actions */}
-      <div className="mt-3 flex gap-2 sm:hidden">
-        <button
-          onClick={() => watch(item)}
-          className="glass glass-edge flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full text-xs font-semibold text-moonlight"
-        >
-          <PlayPumpkinIcon className="size-4" /> Watch
-        </button>
       </div>
     </article>
   );
-}
+});
 
-export function Row({
+export const Row = memo(function Row({
   row,
   favorites,
   onToggleFavorite,
@@ -113,19 +120,27 @@ export function Row({
   if (row.items.length === 0) return null;
 
   return (
-    <div ref={ref} data-visible={visible} className="reveal">
-      <div className="mb-4 flex items-end justify-between gap-4 px-5 sm:px-10">
-        <div>
-          <h3 className="font-display text-xl text-moonlight sm:text-2xl">{row.label}</h3>
-          <p className="mt-1 text-xs text-moonlight/55 sm:text-sm">{row.blurb}</p>
+    <section
+      ref={ref}
+      data-visible={visible}
+      className="reveal content-auto"
+      style={{ containIntrinsicSize: "440px" }}
+      aria-label={row.label}
+    >
+      <div className="gutter mb-3 flex items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h3 className="font-display text-lg font-semibold text-moonlight sm:text-xl">
+            {row.label}
+          </h3>
+          <p className="mt-0.5 truncate text-xs text-moonlight/50">{row.blurb}</p>
         </div>
-        <div className="hidden gap-2 sm:flex">
+        <div className="hidden shrink-0 gap-2 sm:flex">
           {[-1, 1].map((dir) => (
             <button
               key={dir}
               aria-label={dir < 0 ? `Scroll ${row.label} left` : `Scroll ${row.label} right`}
-              onClick={() => scroller.current?.scrollBy({ left: dir * 560, behavior: "smooth" })}
-              className="glass grid size-11 place-items-center rounded-full text-moonlight transition-transform hover:scale-105"
+              onClick={() => scroller.current?.scrollBy({ left: dir * 620, behavior: "smooth" })}
+              className="grid size-9 place-items-center rounded-full border border-border text-moonlight/80 transition-colors hover:bg-white/5"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -146,16 +161,22 @@ export function Row({
         </div>
       </div>
 
-      <div ref={scroller} className="row-scroll flex gap-5 px-5 pb-4 sm:px-10">
-        {row.items.map((item) => (
-          <TitleCard
-            key={item.id + row.id}
-            item={item}
-            isFavorite={favorites.includes(item.id)}
-            onToggleFavorite={onToggleFavorite}
-          />
-        ))}
+      {/* Only mount cards once the row has been seen — keeps deep scrolls light. */}
+      <div ref={scroller} className="row-scroll gutter edge-fade flex gap-4 pb-3">
+        {visible ? (
+          row.items.map((item, i) => (
+            <TitleCard
+              key={item.id}
+              item={item}
+              priority={i < 4}
+              isFavorite={favorites.includes(item.id)}
+              onToggleFavorite={onToggleFavorite}
+            />
+          ))
+        ) : (
+          <div className="h-[400px]" />
+        )}
       </div>
-    </div>
+    </section>
   );
-}
+});

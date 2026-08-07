@@ -2,6 +2,7 @@ import artWitch from "@/assets/art-witch.jpg";
 import artMansion from "@/assets/art-mansion.jpg";
 import artAutumn from "@/assets/art-autumn.jpg";
 import artCartoon from "@/assets/art-cartoon.jpg";
+import { scoresOf } from "./seasonal";
 
 export type VaultKind = "movie" | "episode" | "special";
 
@@ -842,7 +843,20 @@ export interface OracleResult {
 export function consultOracle(mood: OracleMood, exclude: string[] = []): OracleResult {
   const pool = titles.filter((t) => MOOD_MATCH[mood](t) && !exclude.includes(t.id));
   const source = pool.length ? pool : titles;
-  const title = source[Math.floor(Math.random() * source.length)]!;
+  // Seasonal-relevance weighted draw: strong seasonal titles are far likelier,
+  // but the Oracle still surprises with lower-scored hidden gems.
+  const weights = source.map((t) => 1 + Math.pow(scoresOf(t).overall / 100, 2) * 9);
+  const total = weights.reduce((a, b) => a + b, 0);
+  let roll = Math.random() * total;
+  let index = 0;
+  for (let i = 0; i < source.length; i++) {
+    roll -= weights[i]!;
+    if (roll <= 0) {
+      index = i;
+      break;
+    }
+  }
+  const title = source[index]!;
   const tags = getTags(title).slice(0, 3).join(" · ");
   const reasons: Record<OracleMood, string> = {
     Scary: `The Oracle scored this ${title.halloweenScore}/100 on the fear meter and refuses to explain further.`,

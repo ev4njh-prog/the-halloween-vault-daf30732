@@ -26,28 +26,14 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>() {
   return { ref, visible } as const;
 }
 
-/** Normalised page scroll progress, updated on rAF. */
-export function useScrollProgress() {
-  const [progress, setProgress] = useState(0);
-
+/** Debounces fast-changing values (search input) to avoid re-render storms. */
+export function useDebouncedValue<T>(value: T, delay = 180) {
+  const [debounced, setDebounced] = useState(value);
   useEffect(() => {
-    let frame = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const max = document.documentElement.scrollHeight - window.innerHeight;
-        setProgress(max > 0 ? window.scrollY / max : 0);
-      });
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  return progress;
+    const t = window.setTimeout(() => setDebounced(value), delay);
+    return () => window.clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
 }
 
 export function useHydrated() {
