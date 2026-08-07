@@ -1,5 +1,5 @@
 /**
- * THE HALLOWEEN VAULT — Master Data & Compatibility Engine
+ * THE HALLOWEEN VAULT — Master Data & Compatibility Layer
  */
 
 import type {
@@ -9,6 +9,7 @@ import type {
   SearchOptions,
   IntentScores,
   ArtworkPipeline,
+  StreamingAvailability,
 } from "./types";
 import { calculateIntentScores } from "./seasonal";
 import { deduplicateAndMergeTitles, episodeEngine } from "./sources";
@@ -19,7 +20,7 @@ import artMansion from "@/assets/art-mansion.jpg";
 import artAutumn from "@/assets/art-autumn.jpg";
 import artCartoon from "@/assets/art-cartoon.jpg";
 
-// Controlled Hydration State
+// Controlled Hydration Throttle State
 let lastHydrationTime = 0;
 const HYDRATION_COOLDOWN_MS = 1000 * 60 * 15; // 15 Minute Throttling
 
@@ -227,9 +228,12 @@ const SEED_LIBRARY_RAW = [
   },
 ];
 
-// Hydrate items with computed artwork pipelines and 7-metric intent scores
+/* ------------------------------------------------------------------ *
+ * Required Legacy Export 1: titles
+ * ------------------------------------------------------------------ */
+
 export const titles: VaultTitle[] = SEED_LIBRARY_RAW.map((item) => {
-  const intentScores = calculateIntentScores({
+  const intentScores: IntentScores = calculateIntentScores({
     title: item.title,
     description: item.description,
     genres: item.genres,
@@ -255,12 +259,20 @@ export const titles: VaultTitle[] = SEED_LIBRARY_RAW.map((item) => {
 let masterVaultStore: VaultTitle[] = [...titles];
 
 /* ------------------------------------------------------------------ *
- * Required Legacy Exports (Index.tsx Compatibility)
+ * Required Legacy Export 2: featured
  * ------------------------------------------------------------------ */
 
 export const featured: VaultTitle = titles[0]!;
 
+/* ------------------------------------------------------------------ *
+ * Required Legacy Export 3: dailyPicks
+ * ------------------------------------------------------------------ */
+
 export const dailyPicks: VaultTitle[] = titles.slice(0, 4);
+
+/* ------------------------------------------------------------------ *
+ * Required Legacy Export 4: decades
+ * ------------------------------------------------------------------ */
 
 export const decades: string[] = [
   "All",
@@ -273,6 +285,10 @@ export const decades: string[] = [
   "1960s",
   "1950s & Earlier",
 ];
+
+/* ------------------------------------------------------------------ *
+ * Required Legacy Export 5: sections
+ * ------------------------------------------------------------------ */
 
 export const sections: { id: string; title: string; subtitle: string; category: string }[] = [
   {
@@ -307,6 +323,10 @@ export const sections: { id: string; title: string; subtitle: string; category: 
   },
 ];
 
+/* ------------------------------------------------------------------ *
+ * Required Legacy Export 6: countdownToHalloween
+ * ------------------------------------------------------------------ */
+
 export function countdownToHalloween(): { days: number; hours: number; minutes: number } {
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -323,6 +343,10 @@ export function countdownToHalloween(): { days: number; hours: number; minutes: 
 
   return { days, hours, minutes };
 }
+
+/* ------------------------------------------------------------------ *
+ * Required Legacy Export 7: searchVault
+ * ------------------------------------------------------------------ */
 
 export function searchVault(query: string, pool: VaultTitle[] = masterVaultStore): VaultTitle[] {
   const q = query.trim().toLowerCase();
@@ -346,7 +370,7 @@ export function searchVault(query: string, pool: VaultTitle[] = masterVaultStore
 }
 
 /* ------------------------------------------------------------------ *
- * Upgraded Engine Methods & Oracle Support
+ * Upgraded Data Pipeline & Helper Functions
  * ------------------------------------------------------------------ */
 
 export async function hydrateVaultBackground(force = false): Promise<void> {
@@ -363,7 +387,7 @@ export async function hydrateVaultBackground(force = false): Promise<void> {
     const discovered = [...simpsonsEps, ...buffyEps];
     masterVaultStore = deduplicateAndMergeTitles(masterVaultStore, discovered);
   } catch {
-    // Fail gracefully without interrupting user session
+    // Soft error boundary - fallback to seed titles if remote discovery fails
   }
 }
 
@@ -382,12 +406,12 @@ export async function queryVault(
   if (genre) pool = pool.filter((t) => t.genres.includes(genre));
   if (decade) pool = pool.filter((t) => t.decade === decade);
 
-  // Rank by Overall Seasonal Intent Index
+  // Rank using the 7-Metric Overall Intent Index
   pool.sort((a, b) => b.intentScores.overallSeasonal - a.intentScores.overallSeasonal);
 
   const paginated = pool.slice(offset, offset + limit);
 
-  // Lazy-hydrate streaming offers for visible items
+  // Background hydration for watch availability
   paginated.forEach((item) => {
     if (item.externalIds?.tmdb && item.streaming.offers.length === 0) {
       streamingEngine
@@ -395,7 +419,7 @@ export async function queryVault(
           item.externalIds.tmdb,
           item.kind === "episode" || item.kind === "show" ? "tv" : "movie"
         )
-        .then((avail) => {
+        .then((avail: StreamingAvailability) => {
           item.streaming = avail;
         });
     }
@@ -427,7 +451,7 @@ export function consultOracle(mood: OracleMood, excludeIds: string[] = []): Orac
 
   return {
     title: winner,
-    reason: `Chosen by the Halloween Oracle for scoring ${winner.intentScores[targetMetric]}/100 in ${mood} seasonal attributes.`,
+    reason: `Selected for scoring ${winner.intentScores[targetMetric]}/100 in the ${mood} seasonal profile.`,
     matchedScoreKey: targetMetric,
   };
 }
