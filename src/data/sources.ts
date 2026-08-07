@@ -1,145 +1,176 @@
 /**
- * Metadata source architecture.
- * -----------------------------
- * The Vault is provider-agnostic: the local curated library is just one source.
- * Additional sources (TMDB, IMDb datasets, TV metadata databases, community
- * recommendations, curated collections, user submissions) implement the same
- * interface and are merged by `mergeRecords`, so discovery never depends on a
- * single trending feed.
- *
- * Only the local curated source is active today; the rest are registered as
- * inactive adapters so they can be switched on without reshaping the app.
+ * THE HALLOWEEN VAULT — Unified Multi-Source Ingestion Engine
  */
 
-import type { VaultTitle } from "./vault";
+import type { VaultTitle, VaultKind, ArtworkPipeline } from "./types";
+import { calculateIntentScores } from "./seasonal";
+import { streamingEngine } from "./streaming";
 
-export type SourceId =
-  | "vault-curated"
-  | "tmdb"
-  | "imdb-datasets"
-  | "tv-metadata"
-  | "community"
-  | "collections"
-  | "user-submissions";
+const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
 
-export interface SourceRecord {
-  sourceId: SourceId;
-  externalId?: string;
-  title: string;
-  year?: number;
-  overview?: string;
-  genres?: string[];
-  keywords?: string[];
-  cast?: string[];
-  runtime?: string;
-  posterUrl?: string;
-  backdropUrl?: string;
-  episode?: { show: string; season: number; number: number; summary?: string };
-  /** How much this source is trusted when fields conflict (0–1). */
-  confidence: number;
+// Fallback visual SVG generator
+function generatePlaceholderArt(title: string, category: string): string {
+  const encodedTitle = encodeURIComponent(title.length > 22 ? title.substring(0, 20) + "..." : title);
+  const encodedCat = encodeURIComponent(category.toUpperCase());
+  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="500" height="750" viewBox="0 0 500 750"><rect width="100%" height="100%" fill="%230d0714"/><circle cx="250" cy="280" r="140" fill="%23261238"/><text x="50%" y="300" font-family="sans-serif" font-size="28" font-weight="bold" fill="%23f97316" text-anchor="middle">${encodedTitle}</text><text x="50%" y="350" font-family="sans-serif" font-size="14" fill="%23a855f7" text-anchor="middle" letter-spacing="2">${encodedCat}</text></svg>`;
 }
 
-export interface MetadataSource {
-  id: SourceId;
-  label: string;
-  /** Kinds of data this provider contributes. */
-  provides: Array<"metadata" | "artwork" | "episodes" | "cast" | "curation">;
-  active: boolean;
-  search(query: string): Promise<SourceRecord[]>;
-}
-
-/** Merges records for the same work, preferring higher-confidence fields. */
-export function mergeRecords(records: SourceRecord[]): SourceRecord | null {
-  if (records.length === 0) return null;
-  const ordered = [...records].sort((a, b) => b.confidence - a.confidence);
-  const base = { ...ordered[0]! };
-  for (const r of ordered.slice(1)) {
-    if (!base.overview && r.overview) base.overview = r.overview;
-    if (!base.runtime && r.runtime) base.runtime = r.runtime;
-    if (!base.posterUrl && r.posterUrl) base.posterUrl = r.posterUrl;
-    if (!base.backdropUrl && r.backdropUrl) base.backdropUrl = r.backdropUrl;
-    if (base.year === undefined && r.year !== undefined) base.year = r.year;
-    if (!base.episode && r.episode) base.episode = r.episode;
-    base.genres = [...new Set([...(base.genres ?? []), ...(r.genres ?? [])])];
-    base.keywords = [...new Set([...(base.keywords ?? []), ...(r.keywords ?? [])])];
-    base.cast = [...new Set([...(base.cast ?? []), ...(r.cast ?? [])])];
+export function resolveArtwork(
+  title: string,
+  category: string,
+  posterPath?: string | null,
+  backdropPath?: string | null
+): ArtworkPipeline {
+  if (posterPath && posterPath.startsWith("http")) {
+    return {
+      posterUrl: posterPath,
+      backdropUrl: backdropPath && backdropPath.startsWith("http") ? backdropPath : null,
+      sourceType: "tmdb-poster",
+      isFallback: false,
+    };
   }
-  return base;
-}
 
-/* ------------------------------------------------------------------ *
- * Artwork resolution with graceful fallback
- * ------------------------------------------------------------------ */
+  if (posterPath && posterPath.startsWith("/")) {
+    return {
+      posterUrl: `${TMDB_IMAGE_BASE}/w500${posterPath}`,
+      backdropUrl: backdropPath ? `${TMDB_IMAGE_BASE}/w1280${backdropPath}` : null,
+      sourceType: "tmdb-poster",
+      isFallback: false,
+    };
+  }
 
-export interface ArtworkRequest {
-  title: string;
-  localArt: string;
-  posterUrl?: string | null;
-  backdropUrl?: string | null;
-}
+  if (backdropPath && backdropPath.startsWith("/")) {
+    return {
+      posterUrl: `${TMDB_IMAGE_BASE}/w780${backdropPath}`, // Use backdrop as poster frame if poster missing
+      backdropUrl: `${TMDB_IMAGE_BASE}/w1280${backdropPath}`,
+      sourceType: "tmdb-backdrop",
+      isFallback: false,
+    };
+  }
 
-/**
- * Prefers real provider artwork, falls back to curated in-vault artwork and
- * never renders an empty poster frame.
- */
-export function resolvePoster({ localArt, posterUrl }: ArtworkRequest) {
-  return posterUrl?.startsWith("https://") ? posterUrl : localArt;
-}
-
-export function resolveBackdrop({ localArt, backdropUrl }: ArtworkRequest) {
-  return backdropUrl?.startsWith("https://") ? backdropUrl : localArt;
-}
-
-/** Applied on <img onError> so a broken remote poster degrades to local art. */
-export function artworkFallback(localArt: string) {
-  return (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.currentTarget;
-    if (img.src !== localArt) img.src = localArt;
+  return {
+    posterUrl: generatePlaceholderArt(title, category),
+    backdropUrl: null,
+    sourceType: "seasonal-generated",
+    isFallback: true,
   };
 }
 
 /* ------------------------------------------------------------------ *
- * Registry
+ * Title Deduplication Engine
  * ------------------------------------------------------------------ */
 
-const curatedSource: MetadataSource = {
-  id: "vault-curated",
-  label: "Vault curated library",
-  provides: ["metadata", "artwork", "episodes", "cast", "curation"],
-  active: true,
-  async search() {
-    return [];
-  },
-};
-
-const inactive = (
-  id: SourceId,
-  label: string,
-  provides: MetadataSource["provides"],
-): MetadataSource => ({
-  id,
-  label,
-  provides,
-  active: false,
-  async search() {
-    return [];
-  },
-});
-
-export const SOURCES: MetadataSource[] = [
-  curatedSource,
-  inactive("tmdb", "TMDB", ["metadata", "artwork", "cast", "episodes"]),
-  inactive("imdb-datasets", "IMDb datasets", ["metadata", "cast"]),
-  inactive("tv-metadata", "TV metadata database", ["episodes", "metadata"]),
-  inactive("community", "Community recommendations", ["curation"]),
-  inactive("collections", "Curated Halloween collections", ["curation"]),
-  inactive("user-submissions", "User submissions", ["curation", "metadata"]),
-];
-
-export const activeSources = () => SOURCES.filter((s) => s.active);
-
-/** Fan-out search across active sources; local library stays authoritative. */
-export async function searchSources(query: string, local: VaultTitle[]) {
-  const remote = await Promise.all(activeSources().map((s) => s.search(query).catch(() => [])));
-  return { local, remote: remote.flat() };
+export function buildDeduplicationKey(title: string, year: number, kind: VaultKind, showName?: string): string {
+  const cleanStr = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (kind === "episode" && showName) {
+    return `ep:${cleanStr(showName)}:${cleanStr(title)}`;
+  }
+  return `${kind}:${cleanStr(title)}:${year}`;
 }
+
+export function deduplicateAndMergeTitles(existing: VaultTitle[], incoming: VaultTitle[]): VaultTitle[] {
+  const map = new Map<string, VaultTitle>();
+
+  for (const item of [...existing, ...incoming]) {
+    const key = buildDeduplicationKey(
+      item.title,
+      item.year,
+      item.kind,
+      item.episodeInfo?.showTitle
+    );
+
+    if (!map.has(key)) {
+      map.set(key, item);
+    } else {
+      // Merge records: preserve local curated data over automated external imports
+      const current = map.get(key)!;
+      map.set(key, {
+        ...current,
+        externalIds: { ...current.externalIds, ...item.externalIds },
+        artwork: current.artwork.isFallback ? item.artwork : current.artwork,
+        art: current.artwork.isFallback ? item.art : current.art,
+        description: current.description.length > item.description.length ? current.description : item.description,
+      });
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+/* ------------------------------------------------------------------ *
+ * Extended TV & Special Discovery Engine
+ * ------------------------------------------------------------------ */
+
+export class EpisodeDiscoveryEngine {
+  async discoverHalloweenEpisodes(showName: string, tmdbShowId: string): Promise<VaultTitle[]> {
+    const apiKey = (import.meta as any).env?.VITE_TMDB_API_KEY;
+    if (!apiKey) return [];
+
+    try {
+      // Fetch details to inspect all seasons
+      const res = await fetch(`https://api.themoviedb.org/3/tv/${tmdbShowId}?api_key=${apiKey}`);
+      if (!res.ok) return [];
+      const showData = await res.json();
+
+      const episodeTitles: VaultTitle[] = [];
+
+      // Scan seasons for Halloween themes
+      for (const season of (showData.seasons || []).slice(0, 15)) {
+        const sRes = await fetch(`https://api.themoviedb.org/3/tv/${tmdbShowId}/season/${season.season_number}?api_key=${apiKey}`);
+        if (!sRes.ok) continue;
+        const sData = await sRes.json();
+
+        for (const ep of (sData.episodes || [])) {
+          const text = `${ep.name} ${ep.overview}`.toLowerCase();
+          if (text.includes("halloween") || text.includes("pumpkin") || text.includes("costume") || text.includes("haunted")) {
+            const year = parseInt((ep.air_date || showData.first_air_date || "2000").slice(0, 4), 10);
+            const artwork = resolveArtwork(ep.name, "Halloween Episode", ep.still_path, showData.backdrop_path);
+
+            const scores = calculateIntentScores({
+              title: ep.name,
+              description: ep.overview,
+              genres: (showData.genres || []).map((g: any) => g.name),
+              year,
+              kind: "episode"
+            });
+
+            episodeTitles.push({
+              id: `tmdb-ep-${tmdbShowId}-${ep.season_number}-${ep.episode_number}`,
+              externalIds: { tmdb: String(ep.id) },
+              kind: "episode",
+              title: ep.name,
+              episodeInfo: {
+                showTitle: showData.name,
+                showTmdbId: String(tmdbShowId),
+                seasonNumber: ep.season_number,
+                episodeNumber: ep.episode_number,
+                episodeTitle: ep.name,
+                airDate: ep.air_date
+              },
+              year,
+              runtime: `${ep.runtime || 22}m`,
+              genres: (showData.genres || []).map((g: any) => g.name),
+              description: ep.overview || `A special Halloween episode of ${showData.name}.`,
+              cast: [],
+              intentScores: scores,
+              categories: ["Halloween TV Episodes", "Sitcom Specials"],
+              decade: `${Math.floor(year / 10) * 10}s`,
+              tags: ["Halloween", "TV Episode"],
+              artwork,
+              art: artwork.posterUrl,
+              backdropUrl: artwork.backdropUrl || undefined,
+              streaming: { region: "US", watchUrl: null, offers: [], lastUpdated: Date.now() },
+              lastRefreshed: Date.now()
+            });
+          }
+        }
+      }
+
+      return episodeTitles;
+    } catch {
+      return [];
+    }
+  }
+}
+
+export const episodeEngine = new EpisodeDiscoveryEngine();
