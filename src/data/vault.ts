@@ -1,6 +1,3 @@
-/**
- * THE HALLOWEEN VAULT — Master Storage & Controller
- */
 
 import type { VaultTitle, OracleMood, OracleResult, SearchOptions, IntentScores } from "./types";
 import { calculateIntentScores } from "./seasonal";
