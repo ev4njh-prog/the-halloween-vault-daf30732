@@ -169,3 +169,65 @@ export function consultOracle(mood: OracleMood, excludeIds: string[] = []): Orac
     matchedScoreKey: targetMetric,
   };
 }
+export const decades = [
+  "1920s",
+  "1930s",
+  "1940s",
+  "1950s",
+  "1960s",
+  "1970s",
+  "1980s",
+  "1990s",
+  "2000s",
+  "2010s",
+  "2020s"
+];
+
+export const sections = [
+  {
+    title: "Classic Halloween",
+    items: masterVaultStore.filter(t =>
+      t.categories.includes("Classic Halloween")
+    )
+  },
+  {
+    title: "Family Halloween",
+    items: masterVaultStore.filter(t =>
+      t.categories.includes("Family Halloween")
+    )
+  },
+  {
+    title: "Cozy Fall",
+    items: masterVaultStore.filter(t =>
+      t.intentScores.cozyAutumn >= 50
+    )
+  },
+  {
+    title: "Scary Picks",
+    items: masterVaultStore.filter(t =>
+      t.intentScores.spookyLevel >= 50
+    )
+  }
+];
+
+export const dailyPicks = masterVaultStore.slice(0, 5);
+
+export const countdownToHalloween = () => {
+  const halloween = new Date(
+    new Date().getFullYear(),
+    9,
+    31
+  );
+
+  const now = new Date();
+  const diff = halloween.getTime() - now.getTime();
+
+  return Math.max(
+    0,
+    Math.ceil(diff / (1000 * 60 * 60 * 24))
+  );
+};
+
+export async function searchVault(query: string) {
+  return queryVault({ query }).then(result => result.results);
+}
