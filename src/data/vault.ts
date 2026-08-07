@@ -1,32 +1,15 @@
-import artWitch from "@/assets/art-witch.jpg";
-import artMansion from "@/assets/art-mansion.jpg";
-import artAutumn from "@/assets/art-autumn.jpg";
-import artCartoon from "@/assets/art-cartoon.jpg";
-import { scoresOf } from "./seasonal";
+// src/data/vault.ts
+import {
+  VaultTitle,
+  StreamingProviderId,
+  rankSeasonal,
+  scoresOf,
+} from "@/data/seasonal";
 
-export type VaultKind = "movie" | "episode" | "special";
-
-export interface VaultTitle {
-  id: string;
-  kind: VaultKind;
-  title: string;
-  show?: string;
-  season?: number;
-  episode?: number;
-  year: number;
-  runtime: string;
-  genres: string[];
-  description: string;
-  cast: string[];
-  director?: string;
-  halloweenScore: number;
-  fallScore: number;
-  streaming: string[];
-  watchUrl: string | null;
-  art: string;
-  categories: string[];
-  decade: string;
-}
+import artWitch from "@/assets/art/witch.jpg";
+import artMansion from "@/assets/art/mansion.jpg";
+import artAutumn from "@/assets/art/autumn.jpg";
+import artCartoon from "@/assets/art/cartoon.jpg";
 
 const art = {
   witch: artWitch,
@@ -47,13 +30,12 @@ export const titles: VaultTitle[] = [
       "A curious teen lights the Black Flame Candle and resurrects three deliciously wicked witches over Salem on Halloween night.",
     cast: ["Bette Midler", "Sarah Jessica Parker", "Kathy Najimy"],
     director: "Kenny Ortega",
-    halloweenScore: 99,
-    fallScore: 82,
-    streaming: ["Disney+"],
+    streaming: ["disney-plus"],
     watchUrl: "https://dulo.gd/watch/hocus-pocus",
     art: art.witch,
     categories: ["Classic Halloween", "Family Halloween", "Witch Movies", "Halloween Comedies"],
     decade: "1990s",
+    tags: ["Halloween", "Witch", "Small town", "Nostalgic"],
   },
   {
     id: "halloweentown",
@@ -66,13 +48,12 @@ export const titles: VaultTitle[] = [
       "Marnie discovers she descends from a line of witches and steps through a portal into a town where every night is Halloween.",
     cast: ["Debbie Reynolds", "Kimberly J. Brown"],
     director: "Duwayne Dunham",
-    halloweenScore: 97,
-    fallScore: 78,
-    streaming: ["Disney+"],
+    streaming: ["disney-plus"],
     watchUrl: "https://dulo.gd/watch/halloweentown",
     art: art.witch,
     categories: ["Family Halloween", "Witch Movies", "Classic Halloween"],
     decade: "1990s",
+    tags: ["Halloween", "Witch", "Magical", "Nostalgic"],
   },
   {
     id: "nightmare-before-christmas",
@@ -85,13 +66,12 @@ export const titles: VaultTitle[] = [
       "Jack Skellington, the Pumpkin King, grows tired of the same old scares and stumbles into a holiday of snow and light.",
     cast: ["Danny Elfman", "Chris Sarandon", "Catherine O'Hara"],
     director: "Henry Selick",
-    halloweenScore: 100,
-    fallScore: 74,
-    streaming: ["Disney+"],
+    streaming: ["disney-plus"],
     watchUrl: "https://dulo.gd/watch/nightmare-before-christmas",
     art: art.cartoon,
     categories: ["Animated Halloween", "Classic Halloween", "Monster Movies"],
     decade: "1990s",
+    tags: ["Halloween", "Monster", "Skeleton", "Magical"],
   },
   {
     id: "haunted-mansion",
@@ -104,13 +84,12 @@ export const titles: VaultTitle[] = [
       "A realtor's family is trapped inside an elegant Louisiana estate with 999 happy haunts — and room for one more.",
     cast: ["Eddie Murphy", "Terence Stamp"],
     director: "Rob Minkoff",
-    halloweenScore: 88,
-    fallScore: 60,
-    streaming: ["Disney+"],
+    streaming: ["disney-plus"],
     watchUrl: "https://dulo.gd/watch/haunted-mansion",
     art: art.mansion,
     categories: ["Haunted Houses", "Family Halloween", "Halloween Comedies"],
     decade: "2000s",
+    tags: ["Halloween", "Haunted house", "Ghost", "Spooky"],
   },
   {
     id: "the-haunting",
@@ -123,13 +102,12 @@ export const titles: VaultTitle[] = [
       "Four strangers spend a season in Hill House, where the fear arrives entirely through sound, shadow and suggestion.",
     cast: ["Julie Harris", "Claire Bloom"],
     director: "Robert Wise",
-    halloweenScore: 91,
-    fallScore: 55,
-    streaming: ["Max"],
+    streaming: ["max"],
     watchUrl: null,
     art: art.mansion,
     categories: ["Horror", "Haunted Houses", "Hidden Gems"],
     decade: "1960s",
+    tags: ["Haunted house", "Ghost", "Creepy", "Mysterious"],
   },
   {
     id: "sleepy-hollow",
@@ -142,13 +120,12 @@ export const titles: VaultTitle[] = [
       "Ichabod Crane rides into a fog-choked autumn village where a headless horseman collects heads by moonlight.",
     cast: ["Johnny Depp", "Christina Ricci"],
     director: "Tim Burton",
-    halloweenScore: 94,
-    fallScore: 96,
-    streaming: ["Paramount+"],
+    streaming: ["paramount-plus"],
     watchUrl: "https://dulo.gd/watch/sleepy-hollow",
     art: art.mansion,
     categories: ["Horror", "Classic Halloween", "Cozy Autumn Movies"],
     decade: "1990s",
+    tags: ["Halloween", "Autumn", "Forest", "Small town"],
   },
   {
     id: "practical-magic",
@@ -161,13 +138,12 @@ export const titles: VaultTitle[] = [
       "Two sisters bound by a family curse brew midnight margaritas in a seaside house full of herbs, spells and second chances.",
     cast: ["Sandra Bullock", "Nicole Kidman"],
     director: "Griffin Dunne",
-    halloweenScore: 84,
-    fallScore: 93,
-    streaming: ["Max"],
+    streaming: ["max"],
     watchUrl: "https://dulo.gd/watch/practical-magic",
     art: art.witch,
     categories: ["Witch Movies", "Fall Romance", "Cozy Autumn Movies"],
     decade: "1990s",
+    tags: ["Witch", "Autumn", "Cozy", "Magical"],
   },
   {
     id: "young-frankenstein",
@@ -180,13 +156,12 @@ export const titles: VaultTitle[] = [
       "The grandson of the infamous doctor inherits the castle, the lab, and a monster with surprisingly good rhythm.",
     cast: ["Gene Wilder", "Marty Feldman", "Teri Garr"],
     director: "Mel Brooks",
-    halloweenScore: 86,
-    fallScore: 50,
-    streaming: ["Hulu"],
+    streaming: ["hulu"],
     watchUrl: "https://dulo.gd/watch/young-frankenstein",
     art: art.mansion,
     categories: ["Halloween Comedies", "Monster Movies", "Classic Halloween"],
     decade: "1970s",
+    tags: ["Monster", "Halloween", "Nostalgic"],
   },
   {
     id: "creature-black-lagoon",
@@ -199,13 +174,12 @@ export const titles: VaultTitle[] = [
       "An Amazon expedition disturbs a prehistoric amphibian man — the last great Universal Monster.",
     cast: ["Richard Carlson", "Julie Adams"],
     director: "Jack Arnold",
-    halloweenScore: 82,
-    fallScore: 40,
-    streaming: ["Peacock"],
+    streaming: ["peacock"],
     watchUrl: null,
     art: art.mansion,
     categories: ["Monster Movies", "Horror", "Hidden Gems"],
     decade: "1950s",
+    tags: ["Monster", "Creepy"],
   },
   {
     id: "costume-party",
@@ -217,13 +191,12 @@ export const titles: VaultTitle[] = [
     description:
       "A hidden gem: nothing in the title says Halloween, but the whole film unfolds across one masked October night.",
     cast: ["Ensemble cast"],
-    halloweenScore: 71,
-    fallScore: 66,
-    streaming: ["Tubi"],
+    streaming: ["tubi"],
     watchUrl: null,
     art: art.cartoon,
     categories: ["Hidden Gems", "Halloween Comedies"],
-    decade: "Modern",
+    decade: "2010s",
+    tags: ["Costume party", "October", "Halloween"],
   },
   {
     id: "when-harry-met-sally",
@@ -236,13 +209,12 @@ export const titles: VaultTitle[] = [
       "The definitive fall-in-New-York film: sweaters, leaves in Central Park, and a friendship that keeps circling romance.",
     cast: ["Billy Crystal", "Meg Ryan"],
     director: "Rob Reiner",
-    halloweenScore: 12,
-    fallScore: 98,
-    streaming: ["Prime Video"],
+    streaming: ["prime-video"],
     watchUrl: "https://dulo.gd/watch/when-harry-met-sally",
     art: art.autumn,
     categories: ["Fall Romance", "Cozy Autumn Movies"],
     decade: "1980s",
+    tags: ["Fall", "Autumn", "Cozy"],
   },
   {
     id: "pumpkin-season",
@@ -254,13 +226,12 @@ export const titles: VaultTitle[] = [
     description:
       "A family farm fights to keep its patch open one more harvest. Pure hay-bale-and-cider comfort viewing.",
     cast: ["Ensemble cast"],
-    halloweenScore: 44,
-    fallScore: 95,
-    streaming: ["Tubi"],
+    streaming: ["tubi"],
     watchUrl: null,
     art: art.autumn,
     categories: ["Pumpkin Season", "Harvest Themes", "Cozy Autumn Movies"],
-    decade: "Modern",
+    decade: "2020s",
+    tags: ["Pumpkin patch", "Harvest", "Cider", "Farm"],
   },
   {
     id: "simpsons-treehouse-v",
@@ -275,13 +246,12 @@ export const titles: VaultTitle[] = [
     description:
       "The Shinning, Time and Punishment, and Nightmare Cafeteria — the gold standard of the Halloween anthology episode.",
     cast: ["Dan Castellaneta", "Julie Kavner"],
-    halloweenScore: 98,
-    fallScore: 45,
-    streaming: ["Disney+"],
+    streaming: ["disney-plus"],
     watchUrl: "https://dulo.gd/watch/treehouse-of-horror-v",
     art: art.cartoon,
     categories: ["Cartoon Specials", "Sitcom Halloween Episodes", "Animated Specials"],
     decade: "1990s",
+    tags: ["Halloween", "Spooky", "Ghost", "Monster"],
   },
   {
     id: "great-pumpkin",
@@ -295,13 +265,12 @@ export const titles: VaultTitle[] = [
       "Linus waits all night in the sincerest pumpkin patch he can find. Still the most tender Halloween special ever made.",
     cast: ["Peter Robbins", "Christopher Shea"],
     director: "Bill Melendez",
-    halloweenScore: 96,
-    fallScore: 88,
-    streaming: ["Apple TV+"],
+    streaming: ["apple-tv"],
     watchUrl: "https://dulo.gd/watch/great-pumpkin",
     art: art.cartoon,
     categories: ["Animated Specials", "Cartoon Specials", "Family Halloween Episodes"],
     decade: "1960s",
+    tags: ["Halloween", "Pumpkin patch", "Trick or treating", "Wholesome"],
   },
   {
     id: "office-halloween",
@@ -316,13 +285,12 @@ export const titles: VaultTitle[] = [
     description:
       "Michael must fire someone by the end of the day — while wearing a two-headed costume. Excruciating and perfect.",
     cast: ["Steve Carell", "John Krasinski"],
-    halloweenScore: 90,
-    fallScore: 52,
-    streaming: ["Peacock"],
+    streaming: ["peacock"],
     watchUrl: "https://dulo.gd/watch/the-office-halloween",
     art: art.cartoon,
     categories: ["Sitcom Halloween Episodes", "Family Halloween Episodes"],
     decade: "2000s",
+    tags: ["Halloween", "Costume party"],
   },
   {
     id: "wkrp-turkeys",
@@ -337,26 +305,21 @@ export const titles: VaultTitle[] = [
     description:
       "As God is my witness, the greatest Thanksgiving episode in television history — and a Fall Collection essential.",
     cast: ["Gordon Jump", "Loni Anderson"],
-    halloweenScore: 8,
-    fallScore: 94,
-    streaming: ["Hulu"],
+    streaming: ["hulu"],
     watchUrl: null,
     art: art.autumn,
     categories: ["Thanksgiving", "Sitcom Halloween Episodes", "Harvest Themes"],
     decade: "1970s",
+    tags: ["Thanksgiving", "Autumn", "Fall"],
   },
 ];
 
 /* ------------------------------------------------------------------ *
  * Expanded discovery library.
- *
- * These entries are matched by keyword/description analysis rather than by
- * having "Halloween" in the title — costume parties, autumn festivals,
- * monster nights and October specials all surface through the tag engine.
  * ------------------------------------------------------------------ */
 interface Seed {
   id: string;
-  kind: VaultKind;
+  kind: "movie" | "episode" | "special";
   title: string;
   show?: string;
   season?: number;
@@ -365,18 +328,20 @@ interface Seed {
   runtime: string;
   genres: string[];
   description: string;
-  h: number;
-  f: number;
-  streaming: string[];
+  streaming: StreamingProviderId[];
   art: string;
   categories: string[];
 }
 
-const decadeOf = (year: number) => (year >= 2010 ? "Modern" : `${Math.floor(year / 10) * 10}s`);
+const decadeOf = (year: number) => {
+  if (year >= 2020) return "2020s";
+  if (year >= 2010) return "2010s";
+  return `${Math.floor(year / 10) * 10}s`;
+};
 
 const seeds: Seed[] = [
   {
-    id: "costume-party",
+    id: "costume-party-seed",
     kind: "movie",
     title: "The Costume Party",
     year: 2016,
@@ -384,9 +349,7 @@ const seeds: Seed[] = [
     genres: ["Comedy", "Mystery"],
     description:
       "A masquerade in an old manor turns into a night of mistaken identities, hidden passages and one very real ghost.",
-    h: 84,
-    f: 61,
-    streaming: ["Prime Video"],
+    streaming: ["prime-video"],
     art: art.mansion,
     categories: ["Hidden Gems", "Halloween Comedies", "Haunted Houses"],
   },
@@ -399,9 +362,7 @@ const seeds: Seed[] = [
     genres: ["Romance", "Drama"],
     description:
       "A cider-soaked harvest weekend in Vermont: hay bales, orchard lanterns and a slow-burning October romance.",
-    h: 22,
-    f: 96,
-    streaming: ["Netflix"],
+    streaming: ["netflix"],
     art: art.autumn,
     categories: ["Fall Romance", "Cozy Autumn Movies", "Harvest Themes"],
   },
@@ -414,9 +375,7 @@ const seeds: Seed[] = [
     genres: ["Family", "Adventure"],
     description:
       "Every creature in the neighbourhood escapes its storybook on one October evening, and two kids have to write them back in.",
-    h: 88,
-    f: 55,
-    streaming: ["Hulu"],
+    streaming: ["hulu"],
     art: art.cartoon,
     categories: ["Family Halloween", "Monster Movies", "Hidden Gems"],
   },
@@ -429,9 +388,7 @@ const seeds: Seed[] = [
     genres: ["Horror", "Mystery"],
     description:
       "A widow inherits a hilltop estate that keeps rearranging its own rooms. Slow, elegant, deeply unsettling.",
-    h: 92,
-    f: 48,
-    streaming: ["Shudder"],
+    streaming: ["shudder"],
     art: art.mansion,
     categories: ["Haunted Houses", "Horror", "Classic Halloween"],
   },
@@ -447,9 +404,7 @@ const seeds: Seed[] = [
     genres: ["Comedy", "Music"],
     description:
       "A live variety hour broadcast from a fog machine and a papier-mâché graveyard. Gloriously of its time.",
-    h: 86,
-    f: 60,
-    streaming: ["Peacock"],
+    streaming: ["peacock"],
     art: art.cartoon,
     categories: ["Cartoon Specials", "Animated Specials", "Hidden Gems"],
   },
@@ -462,9 +417,7 @@ const seeds: Seed[] = [
     genres: ["Fantasy", "Family"],
     description:
       "A herbalist at the end of a leafy lane teaches a lonely girl three spells — and one of them shouldn't be spoken.",
-    h: 90,
-    f: 74,
-    streaming: ["Disney+"],
+    streaming: ["disney-plus"],
     art: art.witch,
     categories: ["Witch Movies", "Family Halloween", "Hidden Gems"],
   },
@@ -477,9 +430,7 @@ const seeds: Seed[] = [
     genres: ["Drama", "Romance"],
     description:
       "Two estranged siblings reopen their father's mill through one gold-and-rust New England autumn.",
-    h: 14,
-    f: 97,
-    streaming: ["Prime Video"],
+    streaming: ["prime-video"],
     art: art.autumn,
     categories: ["Cozy Autumn Movies", "Harvest Themes", "Fall Romance"],
   },
@@ -492,9 +443,7 @@ const seeds: Seed[] = [
     genres: ["Horror", "Comedy"],
     description:
       "A roadside diner between midnight and dawn on October 31st, where every customer is a little bit dead.",
-    h: 94,
-    f: 40,
-    streaming: ["Shudder"],
+    streaming: ["shudder"],
     art: art.mansion,
     categories: ["Halloween Comedies", "Horror", "Hidden Gems"],
   },
@@ -507,9 +456,7 @@ const seeds: Seed[] = [
     genres: ["Animation", "Family"],
     description:
       "Stop-motion lanterns march through a papercraft town while a lonely scarecrow finds a crown.",
-    h: 97,
-    f: 78,
-    streaming: ["Max"],
+    streaming: ["max"],
     art: art.cartoon,
     categories: ["Animated Specials", "Cartoon Specials", "Pumpkin Season"],
   },
@@ -522,9 +469,7 @@ const seeds: Seed[] = [
     genres: ["Mystery", "Horror"],
     description:
       "Black-and-white, whisper-quiet, and still the best staircase shot ever put on film.",
-    h: 89,
-    f: 45,
-    streaming: ["Criterion"],
+    streaming: ["tubi"],
     art: art.mansion,
     categories: ["Classic Halloween", "Haunted Houses", "Horror"],
   },
@@ -540,9 +485,7 @@ const seeds: Seed[] = [
     genres: ["Comedy"],
     description:
       "The whole cul-de-sac competes for best decorated porch. Someone brings a real coffin.",
-    h: 91,
-    f: 66,
-    streaming: ["Hulu"],
+    streaming: ["hulu"],
     art: art.cartoon,
     categories: ["Sitcom Halloween Episodes", "Family Halloween Episodes"],
   },
@@ -555,9 +498,7 @@ const seeds: Seed[] = [
     genres: ["Fantasy", "Romance"],
     description:
       "At the stroke of twelve every mask in the ballroom comes alive — including the one you're wearing.",
-    h: 87,
-    f: 58,
-    streaming: ["Prime Video"],
+    streaming: ["prime-video"],
     art: art.witch,
     categories: ["Witch Movies", "Hidden Gems", "Classic Halloween"],
   },
@@ -570,9 +511,7 @@ const seeds: Seed[] = [
     genres: ["Horror"],
     description:
       "Harvest in a Kansas corn maze, and something in row nineteen has started keeping pace with you.",
-    h: 90,
-    f: 82,
-    streaming: ["Shudder"],
+    streaming: ["shudder"],
     art: art.autumn,
     categories: ["Horror", "Harvest Themes", "Monster Movies"],
   },
@@ -585,9 +524,7 @@ const seeds: Seed[] = [
     genres: ["Comedy", "Fantasy"],
     description:
       "Three sisters inherit a bakery whose recipes only work if you read them backwards under a full moon.",
-    h: 85,
-    f: 88,
-    streaming: ["Netflix"],
+    streaming: ["netflix"],
     art: art.witch,
     categories: ["Witch Movies", "Halloween Comedies", "Cozy Autumn Movies"],
   },
@@ -600,9 +537,7 @@ const seeds: Seed[] = [
     genres: ["Animation", "Family"],
     description:
       "Hand-painted cels, a gentle werewolf, and a lullaby that has haunted three generations of children.",
-    h: 88,
-    f: 62,
-    streaming: ["Max"],
+    streaming: ["max"],
     art: art.cartoon,
     categories: ["Animated Specials", "Monster Movies", "Family Halloween"],
   },
@@ -615,9 +550,7 @@ const seeds: Seed[] = [
     genres: ["Romance"],
     description:
       "A city chef takes over a country inn during peak leaf season and learns to make pie from scratch.",
-    h: 18,
-    f: 95,
-    streaming: ["Netflix"],
+    streaming: ["netflix"],
     art: art.autumn,
     categories: ["Fall Romance", "Cozy Autumn Movies", "Thanksgiving"],
   },
@@ -633,9 +566,7 @@ const seeds: Seed[] = [
     genres: ["Drama", "Mystery"],
     description:
       "An October 31st shift where every patient arrives already in costume — and one of them isn't wearing one.",
-    h: 93,
-    f: 50,
-    streaming: ["Hulu"],
+    streaming: ["hulu"],
     art: art.mansion,
     categories: ["Sitcom Halloween Episodes", "Hidden Gems", "Horror"],
   },
@@ -648,9 +579,7 @@ const seeds: Seed[] = [
     genres: ["Family", "Fantasy"],
     description:
       "A village where every carved pumpkin holds one wish, and the carvers have run out of candles.",
-    h: 95,
-    f: 84,
-    streaming: ["Disney+"],
+    streaming: ["disney-plus"],
     art: art.cartoon,
     categories: ["Pumpkin Season", "Family Halloween", "Hidden Gems"],
   },
@@ -663,9 +592,7 @@ const seeds: Seed[] = [
     genres: ["Drama", "Mystery"],
     description:
       "A small town where the month refuses to end. Sweaters, fog, and a calendar stuck on the 31st.",
-    h: 80,
-    f: 92,
-    streaming: ["Max"],
+    streaming: ["max"],
     art: art.autumn,
     categories: ["Hidden Gems", "Cozy Autumn Movies", "Haunted Houses"],
   },
@@ -681,9 +608,7 @@ const seeds: Seed[] = [
     genres: ["Fantasy", "Comedy"],
     description:
       "A witch hosts a dinner party for the recently deceased. Seating arrangements become a nightmare.",
-    h: 89,
-    f: 70,
-    streaming: ["Prime Video"],
+    streaming: ["prime-video"],
     art: art.witch,
     categories: ["Witch Movies", "Sitcom Halloween Episodes", "Halloween Comedies"],
   },
@@ -700,8 +625,6 @@ for (const s of seeds) {
     genres: s.genres,
     description: s.description,
     cast: [],
-    halloweenScore: s.h,
-    fallScore: s.f,
     streaming: s.streaming,
     watchUrl: `https://dulo.gd/watch/${s.id}`,
     art: s.art,
@@ -710,70 +633,12 @@ for (const s of seeds) {
   });
 }
 
+export const rankedTitles = rankSeasonal(titles);
+
 /* ------------------------------------------------------------------ *
- * Tag engine — seasonal discovery without relying on titles.
+ * Search & Oracle engine — compatibility functions.
  * ------------------------------------------------------------------ */
 
-export const VAULT_TAGS = [
-  "Halloween",
-  "Fall",
-  "October",
-  "Spooky",
-  "Cozy",
-  "Witch",
-  "Monster",
-  "Ghost",
-  "Pumpkin",
-  "Haunted",
-  "Autumn",
-] as const;
-
-export type VaultTag = (typeof VAULT_TAGS)[number];
-
-const TAG_KEYWORDS: Record<VaultTag, string[]> = {
-  Halloween: [
-    "halloween",
-    "trick or treat",
-    "october 31",
-    "costume",
-    "masquerade",
-    "mask",
-    "candy",
-  ],
-  Fall: ["fall", "leaf", "leaves", "cider", "sweater", "orchard", "thanksgiving"],
-  October: ["october", "31st", "midnight", "season"],
-  Spooky: ["spooky", "eerie", "creepy", "unsettling", "chill", "dark", "fog", "shadow"],
-  Cozy: ["cozy", "warm", "inn", "bakery", "pie", "gentle", "lullaby", "romance"],
-  Witch: ["witch", "coven", "spell", "cackle", "broom", "hex", "herbalist", "potion"],
-  Monster: ["monster", "creature", "werewolf", "vampire", "beast", "goblin"],
-  Ghost: ["ghost", "spirit", "haunting", "deceased", "dead", "poltergeist", "phantom"],
-  Pumpkin: ["pumpkin", "jack-o", "lantern", "patch", "carve", "gourd"],
-  Haunted: ["haunted", "manor", "mansion", "estate", "attic", "graveyard", "cemetery", "crypt"],
-  Autumn: ["autumn", "harvest", "corn", "maze", "hay", "amber", "november"],
-};
-
-/** Derives discovery tags from every text signal on a title. */
-export function tagsFor(t: VaultTitle): VaultTag[] {
-  const hay = [t.title, t.show ?? "", t.description, ...t.genres, ...t.categories]
-    .join(" ")
-    .toLowerCase();
-  const found = VAULT_TAGS.filter((tag) => TAG_KEYWORDS[tag].some((k) => hay.includes(k)));
-  if (t.halloweenScore >= 80 && !found.includes("Halloween")) found.push("Halloween");
-  if (t.fallScore >= 85 && !found.includes("Fall")) found.push("Fall");
-  return found;
-}
-
-const tagIndex = new Map<string, VaultTag[]>();
-export function getTags(t: VaultTitle): VaultTag[] {
-  let v = tagIndex.get(t.id);
-  if (!v) {
-    v = tagsFor(t);
-    tagIndex.set(t.id, v);
-  }
-  return v;
-}
-
-/** Semantic-ish search: title, cast, description, genres, categories and tags. */
 export function searchVault(query: string, pool: VaultTitle[] = titles) {
   const q = query.trim().toLowerCase();
   if (!q) return pool;
@@ -787,7 +652,6 @@ export function searchVault(query: string, pool: VaultTitle[] = titles) {
         ...t.genres,
         ...t.categories,
         ...t.cast,
-        ...getTags(t),
       ]
         .join(" ")
         .toLowerCase();
@@ -803,14 +667,6 @@ export function searchVault(query: string, pool: VaultTitle[] = titles) {
     .map((r) => r.t);
 }
 
-export function byTag(tag: VaultTag) {
-  return titles.filter((t) => getTags(t).includes(tag));
-}
-
-/* ------------------------------------------------------------------ *
- * The Halloween Oracle — mood-driven picks.
- * ------------------------------------------------------------------ */
-
 export type OracleMood = "Scary" | "Funny" | "Family" | "Cozy Fall" | "Classic" | "Animated";
 
 export const ORACLE_MOODS: { mood: OracleMood; blurb: string }[] = [
@@ -824,10 +680,10 @@ export const ORACLE_MOODS: { mood: OracleMood; blurb: string }[] = [
 
 const MOOD_MATCH: Record<OracleMood, (t: VaultTitle) => boolean> = {
   Scary: (t) =>
-    t.genres.includes("Horror") || t.categories.includes("Horror") || t.halloweenScore >= 92,
+    t.genres.includes("Horror") || t.categories.includes("Horror") || scoresOf(t).halloween >= 90,
   Funny: (t) => t.genres.includes("Comedy") || t.categories.includes("Halloween Comedies"),
   Family: (t) => t.genres.includes("Family") || t.categories.some((c) => c.startsWith("Family")),
-  "Cozy Fall": (t) => t.fallScore >= 80,
+  "Cozy Fall": (t) => scoresOf(t).fall >= 80,
   Classic: (t) => t.year < 1995 || t.categories.includes("Classic Halloween"),
   Animated: (t) =>
     t.genres.includes("Animation") ||
@@ -839,12 +695,9 @@ export interface OracleResult {
   reason: string;
 }
 
-/** Casts the spell: a weighted random pick with an explanation. */
 export function consultOracle(mood: OracleMood, exclude: string[] = []): OracleResult {
   const pool = titles.filter((t) => MOOD_MATCH[mood](t) && !exclude.includes(t.id));
   const source = pool.length ? pool : titles;
-  // Seasonal-relevance weighted draw: strong seasonal titles are far likelier,
-  // but the Oracle still surprises with lower-scored hidden gems.
   const weights = source.map((t) => 1 + Math.pow(scoresOf(t).overall / 100, 2) * 9);
   const total = weights.reduce((a, b) => a + b, 0);
   let roll = Math.random() * total;
@@ -857,16 +710,15 @@ export function consultOracle(mood: OracleMood, exclude: string[] = []): OracleR
     }
   }
   const title = source[index]!;
-  const tags = getTags(title).slice(0, 3).join(" · ");
   const reasons: Record<OracleMood, string> = {
-    Scary: `The Oracle scored this ${title.halloweenScore}/100 on the fear meter and refuses to explain further.`,
+    Scary: `The Oracle scored this ${scoresOf(title).halloween}/100 on the fear meter.`,
     Funny: `Chosen for laughs: ${title.genres.join(", ")} with a fog machine somewhere off-camera.`,
     Family: `Safe for the whole coven — ${title.runtime}, ${title.year}, and no nightmares promised.`,
-    "Cozy Fall": `A ${title.fallScore}/100 autumn score. The crystal ball smelled like cinnamon.`,
+    "Cozy Fall": `A ${scoresOf(title).fall}/100 autumn score. The crystal ball smelled like cinnamon.`,
     Classic: `From ${title.year} — the Oracle keeps this one on the top shelf of the vault.`,
     Animated: `Drawn, painted or puppeted. The bats voted for this one.`,
   };
-  return { title, reason: `${reasons[mood]} Tags: ${tags || "Halloween"}.` };
+  return { title, reason: reasons[mood] };
 }
 
 export interface VaultRow {
@@ -983,16 +835,15 @@ export const sections: VaultSection[] = [
   },
 ];
 
-export const decades = ["1950s", "1960s", "1970s", "1980s", "1990s", "2000s", "Modern"];
+export const decades = ["1950s", "1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"];
 
-export const featured = titles.find((t) => t.id === "hocus-pocus")!;
+export const featured = titles.find((t) => t.id === "hocus-pocus") || titles[0]!;
 
-/** Deterministic daily pick so every October day has its own trio. */
 export function dailyPicks(date = new Date()) {
   const day = date.getDate();
-  const pick = (kind: VaultKind) => {
+  const pick = (kind: string) => {
     const pool = titles.filter((t) => t.kind === kind);
-    return pool[day % pool.length]!;
+    return pool[day % pool.length] || titles[0]!;
   };
   return { movie: pick("movie"), episode: pick("episode"), special: pick("special") };
 }
