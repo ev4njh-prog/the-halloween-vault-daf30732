@@ -1,145 +1,182 @@
-/**
- * Metadata source architecture.
- * -----------------------------
- * The Vault is provider-agnostic: the local curated library is just one source.
- * Additional sources (TMDB, IMDb datasets, TV metadata databases, community
- * recommendations, curated collections, user submissions) implement the same
- * interface and are merged by `mergeRecords`, so discovery never depends on a
- * single trending feed.
- *
- * Only the local curated source is active today; the rest are registered as
- * inactive adapters so they can be switched on without reshaping the app.
- */
+// src/data/seasonal.ts
 
-import type { VaultTitle } from "./vault";
+export type VaultKind =
+  | "movie"
+  | "episode"
+  | "special"
+  | "youtube_vlog"
+  | "youtube_diy"
+  | "recipe"
+  | "ambience"
+  | "music";
 
-export type SourceId =
-  | "vault-curated"
-  | "tmdb"
-  | "imdb-datasets"
-  | "tv-metadata"
-  | "community"
-  | "collections"
-  | "user-submissions";
+export type CountryCode =
+  | "US" | "GB" | "IE" | "CA" | "AU" | "NZ"
+  | "FR" | "DE" | "NO" | "SE" | "FI" | "ES" | "IT" | "JP" | "KR";
 
-export interface SourceRecord {
-  sourceId: SourceId;
-  externalId?: string;
+export type StreamingProviderId =
+  | "netflix"
+  | "disney-plus"
+  | "hulu"
+  | "max"
+  | "prime-video"
+  | "apple-tv"
+  | "peacock"
+  | "paramount-plus"
+  | "shudder"
+  | "amc-plus"
+  | "tubi"
+  | "youtube"
+  | "custom";
+
+export interface StreamingService {
+  id: StreamingProviderId;
+  name: string;
+  isFree?: boolean;
+}
+
+export const STREAMING_PROVIDERS: Record<StreamingProviderId, StreamingService> = {
+  netflix: { id: "netflix", name: "Netflix" },
+  "disney-plus": { id: "disney-plus", name: "Disney+" },
+  hulu: { id: "hulu", name: "Hulu" },
+  max: { id: "max", name: "Max" },
+  "prime-video": { id: "prime-video", name: "Prime Video" },
+  "apple-tv": { id: "apple-tv", name: "Apple TV+" },
+  peacock: { id: "peacock", name: "Peacock" },
+  "paramount-plus": { id: "paramount-plus", name: "Paramount+" },
+  shudder: { id: "shudder", name: "Shudder" },
+  "amc-plus": { id: "amc-plus", name: "AMC+" },
+  tubi: { id: "tubi", name: "Tubi", isFree: true },
+  youtube: { id: "youtube", name: "YouTube", isFree: true },
+  custom: { id: "custom", name: "Custom Site" },
+};
+
+export const SEASONAL_TAGS = [
+  // Seasonal & Holidays
+  "Halloween", "Fall", "Autumn", "Thanksgiving", "Harvest", "October", "November",
+  "Pumpkin patch", "Apple orchard", "Corn maze", "Hayride", "Bonfire", "Cider", "Harvest festival",
+  // Atmosphere
+  "Cozy", "Spooky", "Creepy", "Magical", "Nostalgic", "Wholesome", "Mysterious", "Atmospheric",
+  // Setting
+  "Haunted house", "Forest", "Farm", "Small town", "Mansion", "Village", "Carnival", "Countryside",
+  // Characters & Tropes
+  "Witch", "Ghost", "Vampire", "Werewolf", "Zombie", "Skeleton", "Monster", "Black cat", "Scarecrow",
+  // Activities & Media
+  "Pumpkin carving", "Trick or treating", "Costume party", "Baking", "Decorating", "Thanksgiving dinner",
+  "International", "Indie Horror", "DIY", "Vlog", "Ambience"
+] as const;
+
+export type SeasonalTag = (typeof SEASONAL_TAGS)[number];
+
+export interface CustomSearchConfig {
+  name: string;
+  urlPattern: string;
+}
+
+export interface VaultTitle {
+  id: string;
+  kind: VaultKind;
   title: string;
-  year?: number;
-  overview?: string;
-  genres?: string[];
-  keywords?: string[];
-  cast?: string[];
-  runtime?: string;
-  posterUrl?: string;
-  backdropUrl?: string;
-  episode?: { show: string; season: number; number: number; summary?: string };
-  /** How much this source is trusted when fields conflict (0–1). */
-  confidence: number;
+  show?: string;
+  season?: number;
+  episode?: number;
+  year: number;
+  runtime: string;
+  genres: string[];
+  description: string;
+  cast: string[];
+  director?: string;
+  streaming: StreamingProviderId[];
+  watchUrl: string | null;
+  art: string;
+  categories: string[];
+  decade: string;
+  country?: CountryCode;
+  tags?: SeasonalTag[];
+  youtubeId?: string;
 }
 
-export interface MetadataSource {
-  id: SourceId;
-  label: string;
-  /** Kinds of data this provider contributes. */
-  provides: Array<"metadata" | "artwork" | "episodes" | "cast" | "curation">;
-  active: boolean;
-  search(query: string): Promise<SourceRecord[]>;
+export interface SeasonalScores {
+  overall: number;
+  halloween: number;
+  fall: number;
+  autumn: number;
+  october: number;
+  harvest: number;
+  cozy: number;
+  haunted: number;
 }
 
-/** Merges records for the same work, preferring higher-confidence fields. */
-export function mergeRecords(records: SourceRecord[]): SourceRecord | null {
-  if (records.length === 0) return null;
-  const ordered = [...records].sort((a, b) => b.confidence - a.confidence);
-  const base = { ...ordered[0]! };
-  for (const r of ordered.slice(1)) {
-    if (!base.overview && r.overview) base.overview = r.overview;
-    if (!base.runtime && r.runtime) base.runtime = r.runtime;
-    if (!base.posterUrl && r.posterUrl) base.posterUrl = r.posterUrl;
-    if (!base.backdropUrl && r.backdropUrl) base.backdropUrl = r.backdropUrl;
-    if (base.year === undefined && r.year !== undefined) base.year = r.year;
-    if (!base.episode && r.episode) base.episode = r.episode;
-    base.genres = [...new Set([...(base.genres ?? []), ...(r.genres ?? [])])];
-    base.keywords = [...new Set([...(base.keywords ?? []), ...(r.keywords ?? [])])];
-    base.cast = [...new Set([...(base.cast ?? []), ...(r.cast ?? [])])];
+/* Helper functions for tags & scoring evaluation */
+
+export function tagsOf(item: VaultTitle): SeasonalTag[] {
+  if (item.tags && item.tags.length > 0) return item.tags;
+  
+  const text = `${item.title} ${item.description} ${item.genres.join(" ")} ${item.categories.join(" ")}`.toLowerCase();
+  const matched: SeasonalTag[] = [];
+
+  for (const tag of SEASONAL_TAGS) {
+    if (text.includes(tag.toLowerCase())) {
+      matched.push(tag);
+    }
   }
-  return base;
+
+  return matched.length > 0 ? matched : ["Spooky"];
 }
 
-/* ------------------------------------------------------------------ *
- * Artwork resolution with graceful fallback
- * ------------------------------------------------------------------ */
+export function tagCloud(items: VaultTitle[], limit = 16): { tag: SeasonalTag; count: number }[] {
+  const counts = new Map<SeasonalTag, number>();
 
-export interface ArtworkRequest {
-  title: string;
-  localArt: string;
-  posterUrl?: string | null;
-  backdropUrl?: string | null;
+  for (const item of items) {
+    const tags = tagsOf(item);
+    for (const tag of tags) {
+      counts.set(tag, (counts.get(tag) || 0) + 1);
+    }
+  }
+
+  return Array.from(counts.entries())
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
 }
 
-/**
- * Prefers real provider artwork, falls back to curated in-vault artwork and
- * never renders an empty poster frame.
- */
-export function resolvePoster({ localArt, posterUrl }: ArtworkRequest) {
-  return posterUrl?.startsWith("https://") ? posterUrl : localArt;
-}
+export function scoresOf(item: VaultTitle): SeasonalScores {
+  const text = `${item.title} ${item.description} ${item.genres.join(" ")} ${item.categories.join(" ")}`.toLowerCase();
+  
+  let halloween = 50;
+  let fall = 40;
+  let autumn = 40;
+  let october = 45;
+  let harvest = 30;
+  let cozy = 30;
+  let haunted = 35;
 
-export function resolveBackdrop({ localArt, backdropUrl }: ArtworkRequest) {
-  return backdropUrl?.startsWith("https://") ? backdropUrl : localArt;
-}
+  if (text.includes("halloween")) halloween += 35;
+  if (text.includes("witch") || text.includes("ghost") || text.includes("pumpkin")) halloween += 20;
+  if (text.includes("fall") || text.includes("autumn")) { fall += 35; autumn += 35; }
+  if (text.includes("cozy") || text.includes("baking")) cozy += 40;
+  if (text.includes("haunted") || text.includes("horror")) haunted += 40;
+  if (text.includes("october")) october += 40;
+  if (text.includes("harvest") || text.includes("thanksgiving")) harvest += 45;
 
-/** Applied on <img onError> so a broken remote poster degrades to local art. */
-export function artworkFallback(localArt: string) {
-  return (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.currentTarget;
-    if (img.src !== localArt) img.src = localArt;
+  const overall = Math.min(99, Math.round((halloween + fall + autumn + october + haunted) / 5));
+
+  return {
+    overall,
+    halloween: Math.min(99, halloween),
+    fall: Math.min(99, fall),
+    autumn: Math.min(99, autumn),
+    october: Math.min(99, october),
+    harvest: Math.min(99, harvest),
+    cozy: Math.min(99, cozy),
+    haunted: Math.min(99, haunted),
   };
 }
 
-/* ------------------------------------------------------------------ *
- * Registry
- * ------------------------------------------------------------------ */
+export function evaluateTitle(item: VaultTitle) {
+  return scoresOf(item);
+}
 
-const curatedSource: MetadataSource = {
-  id: "vault-curated",
-  label: "Vault curated library",
-  provides: ["metadata", "artwork", "episodes", "cast", "curation"],
-  active: true,
-  async search() {
-    return [];
-  },
-};
-
-const inactive = (
-  id: SourceId,
-  label: string,
-  provides: MetadataSource["provides"],
-): MetadataSource => ({
-  id,
-  label,
-  provides,
-  active: false,
-  async search() {
-    return [];
-  },
-});
-
-export const SOURCES: MetadataSource[] = [
-  curatedSource,
-  inactive("tmdb", "TMDB", ["metadata", "artwork", "cast", "episodes"]),
-  inactive("imdb-datasets", "IMDb datasets", ["metadata", "cast"]),
-  inactive("tv-metadata", "TV metadata database", ["episodes", "metadata"]),
-  inactive("community", "Community recommendations", ["curation"]),
-  inactive("collections", "Curated Halloween collections", ["curation"]),
-  inactive("user-submissions", "User submissions", ["curation", "metadata"]),
-];
-
-export const activeSources = () => SOURCES.filter((s) => s.active);
-
-/** Fan-out search across active sources; local library stays authoritative. */
-export async function searchSources(query: string, local: VaultTitle[]) {
-  const remote = await Promise.all(activeSources().map((s) => s.search(query).catch(() => [])));
-  return { local, remote: remote.flat() };
+export function rankSeasonal(items: VaultTitle[]): VaultTitle[] {
+  return [...items].sort((a, b) => scoresOf(b).overall - scoresOf(a).overall);
 }
