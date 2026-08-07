@@ -147,10 +147,12 @@
   }
 }
 
-/* ---------- True liquid crimson crystal ----------
- * Not blur: the backdrop is REFRACTED through an SVG displacement filter,
- * tinted like transparent blood-red crystal, then lit with inner caustics,
- * a specular top edge and a chromatic rim.
+/* ---------- Crimson glass surfaces ----------
+ * PERFORMANCE NOTE: this is the lightweight production surface — a single
+ * cheap backdrop blur plus static gradients, no SVG displacement filters and
+ * no infinite animations. The class names (`glass`, `glass-deep`,
+ * `glass-sheen`, `glass-edge`) are the stable contract: a future advanced
+ * liquid-glass system can be swapped in here without touching components.
  */
 @utility glass {
   position: relative;
@@ -158,68 +160,45 @@
   background:
     linear-gradient(
       140deg,
-      oklch(0.72 0.22 24 / 0.14) 0%,
-      oklch(0.5 0.2 20 / 0.04) 34%,
-      oklch(0.32 0.12 320 / 0.03) 58%,
-      oklch(0.75 0.2 32 / 0.13) 100%
-    );
-  backdrop-filter: url(#vault-refract) saturate(155%) contrast(106%) brightness(106%);
-  -webkit-backdrop-filter: saturate(155%) contrast(106%) brightness(106%);
-  border: 1px solid oklch(0.82 0.16 26 / 0.32);
+      oklch(0.72 0.22 24 / 0.1) 0%,
+      oklch(0.5 0.2 20 / 0.03) 40%,
+      oklch(0.32 0.12 320 / 0.04) 62%,
+      oklch(0.75 0.2 32 / 0.09) 100%
+    ),
+    oklch(0.16 0.045 315 / 0.55);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid oklch(0.82 0.16 26 / 0.26);
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 0.4),
-    inset 0 -18px 34px -26px oklch(0.75 0.22 24 / 0.75),
-    inset 0 0 60px -28px oklch(0.92 0.12 32 / 0.55),
+    inset 0 1px 0 oklch(1 0 0 / 0.16),
     var(--shadow-ruby);
   transition:
-    backdrop-filter 0.5s ease,
-    box-shadow 0.5s ease,
-    border-color 0.5s ease,
-    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-
-  /* Caustic light pooling inside the crystal. */
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    z-index: -1;
-    background:
-      radial-gradient(60% 45% at 18% 8%, oklch(1 0 0 / 0.22), transparent 62%),
-      radial-gradient(70% 55% at 88% 96%, oklch(0.68 0.24 22 / 0.3), transparent 68%);
-    mix-blend-mode: screen;
-    opacity: 0.85;
-    transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  }
+    box-shadow 0.35s ease,
+    border-color 0.35s ease,
+    background-color 0.35s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 
   &:hover {
-    backdrop-filter: url(#vault-refract-strong) saturate(180%) contrast(110%) brightness(110%);
-    border-color: oklch(0.88 0.18 28 / 0.55);
+    border-color: oklch(0.88 0.18 28 / 0.45);
     box-shadow:
-      inset 0 1px 0 oklch(1 0 0 / 0.55),
-      inset 0 -22px 40px -24px oklch(0.8 0.24 24 / 0.85),
-      inset 0 0 70px -22px oklch(0.95 0.14 34 / 0.7),
-      0 34px 90px -30px oklch(0.55 0.24 20 / 0.75);
-  }
-
-  &:hover::after {
-    opacity: 1;
-    transform: translate3d(2%, -2%, 0) scale(1.04);
+      inset 0 1px 0 oklch(1 0 0 / 0.24),
+      0 30px 80px -34px oklch(0.55 0.24 20 / 0.6);
   }
 }
 
 /* Thicker crystal for hero / modal surfaces. */
 @utility glass-deep {
-  backdrop-filter: url(#vault-refract-strong) saturate(190%) contrast(112%) brightness(108%);
-  -webkit-backdrop-filter: saturate(190%) contrast(112%) brightness(108%);
+  background:
+    linear-gradient(140deg, oklch(0.72 0.22 24 / 0.12), oklch(0.3 0.12 320 / 0.06)),
+    oklch(0.13 0.04 315 / 0.72);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 0.5),
-    inset 0 -30px 60px -34px oklch(0.78 0.24 24 / 0.85),
-    inset 0 0 90px -30px oklch(0.95 0.14 34 / 0.6),
-    0 60px 140px -50px oklch(0.5 0.24 20 / 0.85);
+    inset 0 1px 0 oklch(1 0 0 / 0.2),
+    0 50px 120px -55px oklch(0.5 0.24 20 / 0.7);
 }
 
+/* Static specular sheen (no animation loop). */
 @utility glass-sheen {
   &::before {
     content: "";
@@ -229,35 +208,62 @@
     pointer-events: none;
     background: linear-gradient(
       115deg,
-      transparent 18%,
-      oklch(1 0 0 / 0.26) 36%,
-      oklch(0.86 0.14 28 / 0.16) 45%,
-      transparent 60%
+      transparent 22%,
+      oklch(1 0 0 / 0.09) 40%,
+      transparent 58%
     );
-    background-size: 260% 100%;
-    animation: sheen 9s linear infinite;
-    mix-blend-mode: screen;
   }
 }
 
-/* Refractive rim: chromatic dispersion at the bevel. */
+/* Fine bevel rim. */
 @utility glass-edge {
-  outline: 1px solid oklch(1 0 0 / 0.06);
+  outline: 1px solid oklch(1 0 0 / 0.05);
   outline-offset: -3px;
-  &::after {
-    box-shadow:
-      inset 1px 1px 0 oklch(1 0 0 / 0.28),
-      inset -1px -1px 0 oklch(0.6 0.24 22 / 0.4),
-      inset 0 0 0 1px oklch(0.9 0.1 30 / 0.1);
+}
+
+/* Placeholder hook for the future refraction system. */
+@utility warp-hover {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  &:hover {
+    transform: translateZ(0) scale(1.01);
   }
 }
 
-/* Distorts whatever sits behind it as it moves (used on hover surfaces). */
-@utility warp-hover {
-  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s ease;
-  &:hover {
-    filter: url(#vault-dispersion);
-  }
+/* Defer offscreen work — big win on long library pages. */
+@utility content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 620px;
+}
+
+@utility gutter {
+  padding-inline: var(--space-gutter);
+}
+
+@utility eyebrow {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--color-pumpkin);
+}
+
+@utility wordmark {
+  font-family: var(--font-mark);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Soft horizontal fade on carousels. */
+@utility edge-fade {
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 2.5%,
+    #000 97.5%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(90deg, transparent 0, #000 2.5%, #000 97.5%, transparent 100%);
 }
 
 
