@@ -2,7 +2,8 @@ import artWitch from "@/assets/art-witch.jpg";
 import artMansion from "@/assets/art-mansion.jpg";
 import artAutumn from "@/assets/art-autumn.jpg";
 import artCartoon from "@/assets/art-cartoon.jpg";
-import { scoresOf } from "./seasonal";
+import { rankSeasonal, scoresOf } from "./seasonal";
+import { generatedCatalog } from "./catalog";
 
 export type VaultKind = "movie" | "episode" | "special";
 
@@ -722,6 +723,10 @@ for (const s of seeds) {
   });
 }
 
+/* The curated core above is the editorial spine; the generated catalog scales
+ * the Vault to platform size (thousands of movies, episodes and specials). */
+titles.push(...generatedCatalog);
+
 /* ------------------------------------------------------------------ *
  * Tag engine — seasonal discovery without relying on titles.
  * ------------------------------------------------------------------ */
@@ -766,7 +771,15 @@ const TAG_KEYWORDS: Record<VaultTag, string[]> = {
 
 /** Derives discovery tags from every text signal on a title. */
 export function tagsFor(t: VaultTitle): VaultTag[] {
-  const hay = [t.title, t.show ?? "", t.description, ...t.genres, ...t.categories]
+  const hay = [
+    t.title,
+    t.show ?? "",
+    t.description,
+    ...t.genres,
+    ...t.categories,
+    ...(t.keywords ?? []),
+    ...(t.userTags ?? []),
+  ]
     .join(" ")
     .toLowerCase();
   const found = VAULT_TAGS.filter((tag) => TAG_KEYWORDS[tag].some((k) => hay.includes(k)));
@@ -799,6 +812,9 @@ export function searchVault(query: string, pool: VaultTitle[] = titles) {
         ...t.genres,
         ...t.categories,
         ...t.cast,
+        ...(t.keywords ?? []),
+        ...(t.userTags ?? []),
+        t.franchise ?? "",
         ...getTags(t),
       ]
         .join(" ")
@@ -894,7 +910,15 @@ export interface VaultSection {
   rows: VaultRow[];
 }
 
-const by = (...cats: string[]) => titles.filter((t) => t.categories.some((c) => cats.includes(c)));
+const by = (...cats: string[]) =>
+  rankSeasonal(titles.filter((t) => t.categories.some((c) => cats.includes(c)))).slice(0, 24);
+
+const byKind = (kind: VaultKind, ...cats: string[]) =>
+  rankSeasonal(
+    titles.filter(
+      (t) => t.kind === kind && (cats.length === 0 || t.categories.some((c) => cats.includes(c))),
+    ),
+  ).slice(0, 24);
 
 export const sections: VaultSection[] = [
   {
