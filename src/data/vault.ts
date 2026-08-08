@@ -26,6 +26,18 @@ export interface VaultTitle {
   art: string;
   categories: string[];
   decade: string;
+  /** Extra discovery signals (plot keywords, community/user tags). */
+  keywords?: string[];
+  userTags?: string[];
+  /** Franchise / series relationship used for "more like this". */
+  franchise?: string;
+  /** Internal seasonal theme id used for similar-content relationships. */
+  themeId?: string;
+  network?: string;
+  /** Remote artwork candidates, resolved through the artwork chain. */
+  posterUrl?: string | null;
+  backdropUrl?: string | null;
+
 }
 
 const art = {
