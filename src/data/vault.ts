@@ -3,7 +3,7 @@ import artMansion from "@/assets/art-mansion.jpg";
 import artAutumn from "@/assets/art-autumn.jpg";
 import artCartoon from "@/assets/art-cartoon.jpg";
 import { rankSeasonal, scoresOf } from "./seasonal";
-import { generatedCatalog } from "./catalog";
+import { generatedCatalog, relatedIds } from "./catalog";
 
 export type VaultKind = "movie" | "episode" | "special";
 
@@ -1036,6 +1036,42 @@ export const sections: VaultSection[] = [
         blurb: "The specials that made October feel like October.",
         items: by("Cartoon Specials", "Animated Specials"),
       },
+      {
+        id: "anthology",
+        label: "Anthology Episodes",
+        blurb: "One story, one night, no survivors guaranteed.",
+        items: by("Anthology Episodes"),
+      },
+      {
+        id: "school-episodes",
+        label: "School & Family Halloween Episodes",
+        blurb: "Costume parades, assemblies and the fall dance.",
+        items: byKind("episode", "Family Halloween", "Sitcom Halloween Episodes"),
+      },
+      {
+        id: "harvest-episodes",
+        label: "Autumn & Harvest Episodes",
+        blurb: "Hayrides, cider contests and the long table.",
+        items: byKind("episode", "Harvest Themes", "Thanksgiving", "Cozy Autumn Movies"),
+      },
+    ],
+  },
+  {
+    id: "specials",
+    label: "Specials & Seasonal Events",
+    rows: [
+      {
+        id: "events",
+        label: "Annual Halloween Events",
+        blurb: "Spooktaculars, live tours and pumpkin nights, year by year.",
+        items: by("Seasonal Events"),
+      },
+      {
+        id: "holiday-specials",
+        label: "Holiday Specials",
+        blurb: "Broadcast in the last week of October, every October.",
+        items: by("Holiday Specials"),
+      },
     ],
   },
   {
@@ -1103,4 +1139,117 @@ export function countdownToHalloween(now = new Date()) {
     minutes: Math.max(0, Math.floor((ms % 3600000) / 60000)),
     seconds: Math.max(0, Math.floor((ms % 60000) / 1000)),
   };
+}
+
+/* ------------------------------------------------------------------ *
+ * The Halloween Calendar — a dedicated October experience.
+ * All picks are deterministic per calendar day (no hydration drift) and
+ * validated against the index before being surfaced.
+ * ------------------------------------------------------------------ */
+
+const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+
+function dayHash(d: Date, salt: string) {
+  const str = `${dayKey(d)}:${salt}`;
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) / 4294967296;
+}
+
+function pickFor(pool: VaultTitle[], d: Date, salt: string) {
+  const valid = pool.filter(verifyTitle);
+  if (!valid.length) return undefined;
+  const ranked = rankSeasonal(valid).slice(0, Math.max(20, Math.floor(valid.length * 0.25)));
+  return ranked[Math.floor(dayHash(d, salt) * ranked.length)]!;
+}
+
+export interface CalendarDay {
+  date: Date;
+  label: string;
+  halloweenPick?: VaultTitle;
+  fallPick?: VaultTitle;
+  episodePick?: VaultTitle;
+  collection: { label: string; blurb: string; items: VaultTitle[] };
+  trivia: string;
+}
+
+const TRIVIA = [
+  "Jack-o’-lanterns were originally carved from turnips — pumpkins were the New World upgrade.",
+  "The word “Halloween” is a contraction of All Hallows’ Even, the night before All Saints’ Day.",
+  "Black cats were once carried on ships for luck, not bad omens.",
+  "Trick-or-treating as we know it was popularised in North America in the 1930s and 40s.",
+  "Bobbing for apples began as a Roman harvest ritual honouring Pomona, goddess of orchards.",
+  "The first feature-length stop-motion Halloween film crews often cite is a 76-minute labour of 109,440 frames.",
+  "A “harvest moon” is simply the full moon closest to the autumn equinox.",
+  "Scarecrows appear in farming records over 3,000 years old.",
+  "Candy corn was originally called “chicken feed” when it launched in the 1880s.",
+  "Sleepy Hollow’s Headless Horseman rides from a story published in 1820.",
+  "Barmbrack, an Irish Halloween bread, hides charms that predict the eater’s year.",
+  "Orange and black got their Halloween pairing from harvest gold and the dark of winter.",
+  "The record for the heaviest pumpkin sits well over a tonne.",
+  "Anthology horror TV boomed in the 1960s because each episode could reuse one standing set.",
+  "Fog machines on classic sets used heated mineral oil long before dry ice became standard.",
+];
+
+const COLLECTION_ROTATION: { label: string; blurb: string; cats: string[] }[] = [
+  { label: "Witching Hour", blurb: "Covens, hexes and herb gardens.", cats: ["Witch Movies"] },
+  { label: "Haunted Estates", blurb: "Elegant houses with bad habits.", cats: ["Haunted Houses"] },
+  { label: "Pumpkin Season", blurb: "Patches, carving and lantern light.", cats: ["Pumpkin Season"] },
+  { label: "Cozy Autumn", blurb: "Cider, sweaters, amber light.", cats: ["Cozy Autumn Movies"] },
+  { label: "Monster Night", blurb: "Creatures, labs and fog.", cats: ["Monster Movies"] },
+  { label: "Sitcom October", blurb: "Twenty-two minutes of costume chaos.", cats: ["Sitcom Halloween Episodes"] },
+  { label: "Animated October", blurb: "Cels, puppets and specials.", cats: ["Animated Specials", "Cartoon Specials"] },
+  { label: "Harvest Table", blurb: "Barns, fairs and the long table.", cats: ["Harvest Themes", "Thanksgiving"] },
+  { label: "Hidden Gems", blurb: "Under-seen, over-qualified.", cats: ["Hidden Gems"] },
+  { label: "Anthology Night", blurb: "One story, one night.", cats: ["Anthology Episodes"] },
+];
+
+export function calendarDay(date = new Date()): CalendarDay {
+  const movies = titles.filter((t) => t.kind !== "episode");
+  const episodes = titles.filter((t) => t.kind === "episode");
+  const cozy = titles.filter((t) => t.fallScore >= 78);
+
+  const rotation =
+    COLLECTION_ROTATION[Math.floor(dayHash(date, "collection") * COLLECTION_ROTATION.length)]!;
+  const items = rankSeasonal(
+    titles.filter((t) => t.categories.some((c) => rotation.cats.includes(c))),
+  ).slice(0, 18);
+
+  return {
+    date,
+    label: date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" }),
+    halloweenPick: pickFor(movies, date, "halloween"),
+    fallPick: pickFor(cozy, date, "fall"),
+    episodePick: pickFor(episodes, date, "episode"),
+    collection: { label: rotation.label, blurb: rotation.blurb, items },
+    trivia: TRIVIA[Math.floor(dayHash(date, "trivia") * TRIVIA.length)]!,
+  };
+}
+
+/** The full October grid — every day of the month with its own pick. */
+export function octoberGrid(year = new Date().getFullYear()) {
+  return Array.from({ length: 31 }, (_, i) => {
+    const d = new Date(year, 9, i + 1);
+    return { day: i + 1, date: d, pick: pickFor(titles, d, "grid"), trivia: TRIVIA[Math.floor(dayHash(d, "trivia") * TRIVIA.length)]! };
+  });
+}
+
+/** Library statistics used across the UI. */
+export const libraryStats = () => ({
+  total: titles.length,
+  movies: titles.filter((t) => t.kind === "movie").length,
+  episodes: titles.filter((t) => t.kind === "episode").length,
+  specials: titles.filter((t) => t.kind === "special").length,
+  shows: new Set(titles.filter((t) => t.show).map((t) => t.show)).size,
+});
+
+/** Similar / franchise-related titles for a given entry. */
+export function relatedTitles(t: VaultTitle, limit = 12) {
+  return relatedIds(titles, t, limit)
+    .map((id) => titleIndex.get(id))
+    .filter(verifyTitle)
+    .slice(0, limit);
 }
