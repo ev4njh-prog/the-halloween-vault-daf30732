@@ -4,6 +4,7 @@ import heroTown from "@/assets/hero-town.jpg";
 import { HouseIntro } from "@/components/vault/HouseIntro";
 import { Atmosphere } from "@/components/vault/Atmosphere";
 import { Oracle } from "@/components/vault/Oracle";
+import { HalloweenCalendar } from "@/components/vault/Calendar";
 import { Row, TitleCard } from "@/components/vault/Row";
 import {
   CandlesIcon,
@@ -439,6 +440,8 @@ function VaultHome() {
             )}
           </section>
         )}
+
+        <HalloweenCalendar />
 
         {/* ---------------- Today's picks ---------------- */}
         <section className="gutter mx-auto max-w-[1400px] py-[var(--space-section)]">
