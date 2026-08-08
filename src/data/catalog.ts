@@ -816,7 +816,7 @@ function makeMovies(): VaultTitle[] {
         decade: decadeOf(year),
         keywords: theme.keywords,
         userTags: theme.userTags,
-        franchise: sequel ? name : undefined,
+        ...(sequel ? { franchise: name } : {}),
         themeId: theme.id,
       });
     }
