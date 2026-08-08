@@ -837,29 +837,70 @@ export function byTag(tag: VaultTag) {
 
 /* ------------------------------------------------------------------ *
  * The Halloween Oracle — mood-driven picks.
+ * Every result is drawn from the indexed library and validated before it is
+ * returned, so the Oracle can never recommend something that does not exist.
  * ------------------------------------------------------------------ */
 
-export type OracleMood = "Scary" | "Funny" | "Family" | "Cozy Fall" | "Classic" | "Animated";
+export type OracleMood =
+  | "Classic Halloween"
+  | "Family Fun"
+  | "Scary"
+  | "Supernatural"
+  | "Witchy"
+  | "Ghost Stories"
+  | "Cozy Autumn"
+  | "Harvest Season"
+  | "Animated"
+  | "Hidden Gems"
+  | "TV Episodes"
+  | "90s Halloween"
+  | "80s Halloween"
+  | "Campy Halloween"
+  | "Dark Fantasy";
 
 export const ORACLE_MOODS: { mood: OracleMood; blurb: string }[] = [
+  { mood: "Classic Halloween", blurb: "The canon of October." },
+  { mood: "Family Fun", blurb: "Spooky enough for everyone." },
   { mood: "Scary", blurb: "Lights off. Doors locked." },
-  { mood: "Funny", blurb: "Screams, but the laughing kind." },
-  { mood: "Family", blurb: "Spooky enough for everyone." },
-  { mood: "Cozy Fall", blurb: "Cider, sweaters, amber light." },
-  { mood: "Classic", blurb: "The canon of October." },
+  { mood: "Supernatural", blurb: "Things that shouldn't be here." },
+  { mood: "Witchy", blurb: "Covens, hexes and herb gardens." },
+  { mood: "Ghost Stories", blurb: "Cold rooms and patient guests." },
+  { mood: "Cozy Autumn", blurb: "Cider, sweaters, amber light." },
+  { mood: "Harvest Season", blurb: "Barns, mazes and the long table." },
   { mood: "Animated", blurb: "Cels, puppets and specials." },
+  { mood: "Hidden Gems", blurb: "Under-seen, over-qualified." },
+  { mood: "TV Episodes", blurb: "Twenty-two minutes of chaos." },
+  { mood: "90s Halloween", blurb: "VHS orange and purple." },
+  { mood: "80s Halloween", blurb: "Practical effects, real fog." },
+  { mood: "Campy Halloween", blurb: "Gloriously silly monsters." },
+  { mood: "Dark Fantasy", blurb: "Portals, prophecies, autumn kingdoms." },
 ];
 
+const hasCat = (t: VaultTitle, ...cats: string[]) =>
+  t.categories.some((c) => cats.some((x) => c.toLowerCase().includes(x.toLowerCase())));
+const hasUserTag = (t: VaultTitle, ...tags: string[]) =>
+  (t.userTags ?? []).some((x) => tags.includes(x));
+
 const MOOD_MATCH: Record<OracleMood, (t: VaultTitle) => boolean> = {
-  Scary: (t) =>
-    t.genres.includes("Horror") || t.categories.includes("Horror") || t.halloweenScore >= 92,
-  Funny: (t) => t.genres.includes("Comedy") || t.categories.includes("Halloween Comedies"),
-  Family: (t) => t.genres.includes("Family") || t.categories.some((c) => c.startsWith("Family")),
-  "Cozy Fall": (t) => t.fallScore >= 80,
-  Classic: (t) => t.year < 1995 || t.categories.includes("Classic Halloween"),
-  Animated: (t) =>
-    t.genres.includes("Animation") ||
-    t.categories.some((c) => c.includes("Animated") || c.includes("Cartoon")),
+  "Classic Halloween": (t) => hasCat(t, "Classic Halloween") || t.halloweenScore >= 92,
+  "Family Fun": (t) => t.genres.includes("Family") || hasCat(t, "Family"),
+  Scary: (t) => t.genres.includes("Horror") || hasCat(t, "Horror"),
+  Supernatural: (t) =>
+    hasUserTag(t, "Paranormal", "Ghost Story", "Magic", "Dark Fantasy") ||
+    hasCat(t, "Haunted", "Monster"),
+  Witchy: (t) => hasCat(t, "Witch") || hasUserTag(t, "Witch", "Magic"),
+  "Ghost Stories": (t) => hasUserTag(t, "Ghost Story", "Paranormal") || hasCat(t, "Haunted"),
+  "Cozy Autumn": (t) => t.fallScore >= 80 && t.halloweenScore < 80,
+  "Harvest Season": (t) => hasCat(t, "Harvest", "Thanksgiving", "Pumpkin"),
+  Animated: (t) => t.genres.includes("Animation") || hasCat(t, "Animated", "Cartoon"),
+  "Hidden Gems": (t) => hasCat(t, "Hidden Gems") || t.streaming.length <= 1,
+  "TV Episodes": (t) => t.kind === "episode",
+  "90s Halloween": (t) => t.year >= 1990 && t.year <= 1999,
+  "80s Halloween": (t) => t.year >= 1980 && t.year <= 1989,
+  "Campy Halloween": (t) =>
+    hasUserTag(t, "Campy Halloween", "Retro Halloween") ||
+    (t.genres.includes("Comedy") && t.halloweenScore >= 78),
+  "Dark Fantasy": (t) => hasUserTag(t, "Dark Fantasy", "Wizard") || hasCat(t, "Witch Movies"),
 };
 
 export interface OracleResult {
@@ -867,16 +908,34 @@ export interface OracleResult {
   reason: string;
 }
 
-/** Casts the spell: a weighted random pick with an explanation. */
+/** True only for titles that exist in the index and carry displayable metadata. */
+export function verifyTitle(t: VaultTitle | undefined): t is VaultTitle {
+  return Boolean(
+    t &&
+      titleIndex.has(t.id) &&
+      t.title?.trim() &&
+      t.description?.trim() &&
+      t.art &&
+      t.year > 1900 &&
+      t.genres.length > 0,
+  );
+}
+
+const titleIndex = new Map(titles.map((t) => [t.id, t]));
+export const getTitle = (id: string) => titleIndex.get(id);
+
+/** Casts the spell: a validated, weighted random pick with an explanation. */
 export function consultOracle(mood: OracleMood, exclude: string[] = []): OracleResult {
-  const pool = titles.filter((t) => MOOD_MATCH[mood](t) && !exclude.includes(t.id));
-  const source = pool.length ? pool : titles;
-  // Seasonal-relevance weighted draw: strong seasonal titles are far likelier,
-  // but the Oracle still surprises with lower-scored hidden gems.
-  const weights = source.map((t) => 1 + Math.pow(scoresOf(t).overall / 100, 2) * 9);
+  const match = MOOD_MATCH[mood];
+  const strict = titles.filter((t) => match(t) && verifyTitle(t) && !exclude.includes(t.id));
+  const source = strict.length ? strict : titles.filter(verifyTitle);
+
+  // Seasonal-relevance weighted draw with a variety floor, so hidden gems and
+  // deep-catalog episodes still surface instead of the same ten classics.
+  const weights = source.map((t) => 0.6 + Math.pow(scoresOf(t).overall / 100, 1.6) * 6);
   const total = weights.reduce((a, b) => a + b, 0);
   let roll = Math.random() * total;
-  let index = 0;
+  let index = Math.floor(Math.random() * source.length);
   for (let i = 0; i < source.length; i++) {
     roll -= weights[i]!;
     if (roll <= 0) {
@@ -885,17 +944,15 @@ export function consultOracle(mood: OracleMood, exclude: string[] = []): OracleR
     }
   }
   const title = source[index]!;
-  const tags = getTags(title).slice(0, 3).join(" · ");
-  const reasons: Record<OracleMood, string> = {
-    Scary: `The Oracle scored this ${title.halloweenScore}/100 on the fear meter and refuses to explain further.`,
-    Funny: `Chosen for laughs: ${title.genres.join(", ")} with a fog machine somewhere off-camera.`,
-    Family: `Safe for the whole coven — ${title.runtime}, ${title.year}, and no nightmares promised.`,
-    "Cozy Fall": `A ${title.fallScore}/100 autumn score. The crystal ball smelled like cinnamon.`,
-    Classic: `From ${title.year} — the Oracle keeps this one on the top shelf of the vault.`,
-    Animated: `Drawn, painted or puppeted. The bats voted for this one.`,
+  const tags = [...getTags(title), ...(title.userTags ?? [])].slice(0, 3).join(" · ");
+  const s = scoresOf(title);
+  const where = title.kind === "episode" ? `${title.show} · S${title.season}E${title.episode}` : `${title.year}`;
+  return {
+    title,
+    reason: `${mood}: seasonal relevance ${s.overall}/100 (Halloween ${s.halloween}, Fall ${s.fall}). ${where} · ${title.runtime} · ${title.streaming.join(", ") || "Vault archive"}. Tags: ${tags || "Halloween"}.`,
   };
-  return { title, reason: `${reasons[mood]} Tags: ${tags || "Halloween"}.` };
 }
+
 
 export interface VaultRow {
   id: string;
