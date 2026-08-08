@@ -1169,9 +1169,9 @@ function pickFor(pool: VaultTitle[], d: Date, salt: string) {
 export interface CalendarDay {
   date: Date;
   label: string;
-  halloweenPick?: VaultTitle;
-  fallPick?: VaultTitle;
-  episodePick?: VaultTitle;
+  halloweenPick?: VaultTitle | undefined;
+  fallPick?: VaultTitle | undefined;
+  episodePick?: VaultTitle | undefined;
   collection: { label: string; blurb: string; items: VaultTitle[] };
   trivia: string;
 }

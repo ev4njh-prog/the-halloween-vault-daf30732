@@ -22,7 +22,7 @@ export interface EffectProps {
   enabled?: boolean;
   /** 0 = off, 1 = full premium effect. Reduced motion should pass 0. */
   intensity?: number;
-  className?: string;
+  className?: string | undefined;
 }
 
 /* ------------------------------------------------------------------ *
@@ -85,7 +85,7 @@ export function useScrollTrigger<T extends HTMLElement = HTMLDivElement>(margin 
  * Placeholder layers — render nothing visible today
  * ------------------------------------------------------------------ */
 
-const Placeholder = ({ id, className }: { id: string; className?: string }) => (
+const Placeholder = ({ id, className }: { id: string; className?: string | undefined }) => (
   <div aria-hidden data-effect-slot={id} className={className} />
 );
 
