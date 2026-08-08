@@ -90,6 +90,96 @@ export function resolveBackdrop({ localArt, backdropUrl }: ArtworkRequest) {
   return backdropUrl?.startsWith("https://") ? backdropUrl : localArt;
 }
 
+/* ------------------------------------------------------------------ *
+ * Artwork acquisition chain
+ * ------------------------------------------------------------------ *
+ * Artwork is never sourced from a single provider. Each request walks an
+ * ordered chain of candidates and stops at the first usable one; the curated
+ * in-vault artwork always terminates the chain, so a poster frame is never
+ * empty. Providers are registered here and enabled as they come online.
+ */
+
+export type ArtworkKind = "poster" | "backdrop" | "episode" | "show";
+
+export interface ArtworkProvider {
+  id: SourceId;
+  label: string;
+  kinds: ArtworkKind[];
+  priority: number;
+  active: boolean;
+  /** Returns an absolute https URL, or null when this provider has nothing. */
+  resolve(req: ArtworkRequest, kind: ArtworkKind): string | null;
+}
+
+const httpsOnly = (url?: string | null) =>
+  typeof url === "string" && url.startsWith("https://") ? url : null;
+
+export const ARTWORK_PROVIDERS: ArtworkProvider[] = [
+  {
+    id: "tmdb",
+    label: "TMDB artwork",
+    kinds: ["poster", "backdrop", "episode", "show"],
+    priority: 100,
+    active: false,
+    resolve: (req, kind) => httpsOnly(kind === "poster" ? req.posterUrl : req.backdropUrl),
+  },
+  {
+    id: "tv-metadata",
+    label: "TV metadata artwork",
+    kinds: ["episode", "show", "poster"],
+    priority: 80,
+    active: false,
+    resolve: (req, kind) => httpsOnly(kind === "poster" ? req.posterUrl : req.backdropUrl),
+  },
+  {
+    id: "imdb-datasets",
+    label: "IMDb artwork",
+    kinds: ["poster"],
+    priority: 60,
+    active: false,
+    resolve: (req) => httpsOnly(req.posterUrl),
+  },
+  {
+    id: "collections",
+    label: "Curated collection artwork",
+    kinds: ["poster", "backdrop"],
+    priority: 40,
+    active: true,
+    resolve: (req, kind) => httpsOnly(kind === "poster" ? req.posterUrl : req.backdropUrl),
+  },
+  {
+    id: "vault-curated",
+    label: "Vault curated artwork",
+    kinds: ["poster", "backdrop", "episode", "show"],
+    priority: 10,
+    active: true,
+    resolve: (req) => req.localArt,
+  },
+];
+
+/** Ordered list of every artwork URL worth attempting, best first. */
+export function artworkChain(req: ArtworkRequest, kind: ArtworkKind = "poster"): string[] {
+  const urls = ARTWORK_PROVIDERS.filter((p) => p.active && p.kinds.includes(kind))
+    .sort((a, b) => b.priority - a.priority)
+    .map((p) => p.resolve(req, kind))
+    .filter((u): u is string => Boolean(u));
+  return [...new Set([...urls, req.localArt])];
+}
+
+/**
+ * onError handler that walks the whole chain instead of failing to one image:
+ * each broken candidate advances to the next provider, ending on local art.
+ */
+export function artworkChainFallback(req: ArtworkRequest, kind: ArtworkKind = "poster") {
+  const chain = artworkChain(req, kind);
+  return (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    const idx = chain.indexOf(img.src);
+    const next = chain[idx + 1] ?? req.localArt;
+    if (img.src !== next) img.src = next;
+  };
+}
+
 /** Applied on <img onError> so a broken remote poster degrades to local art. */
 export function artworkFallback(localArt: string) {
   return (e: React.SyntheticEvent<HTMLImageElement>) => {

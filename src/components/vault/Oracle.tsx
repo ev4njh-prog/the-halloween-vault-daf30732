@@ -6,17 +6,26 @@ import { crystalChime, drumRoll, magicReveal, pumpkinPop, spellCast } from "@/li
 import { PlayPumpkinIcon } from "./icons";
 
 const MOOD_GLYPH: Record<OracleMood, string> = {
+  "Classic Halloween": "✶",
+  "Family Fun": "❋",
   Scary: "☾",
-  Funny: "✷",
-  Family: "❋",
-  "Cozy Fall": "✦",
-  Classic: "✶",
+  Supernatural: "✧",
+  Witchy: "✷",
+  "Ghost Stories": "❈",
+  "Cozy Autumn": "✦",
+  "Harvest Season": "❂",
   Animated: "✵",
+  "Hidden Gems": "◈",
+  "TV Episodes": "▤",
+  "90s Halloween": "✹",
+  "80s Halloween": "✸",
+  "Campy Halloween": "☻",
+  "Dark Fantasy": "✺",
 };
 
 /** THE HALLOWEEN ORACLE — the Vault's signature seasonal recommender. */
 export function Oracle() {
-  const [mood, setMood] = useState<OracleMood>("Scary");
+  const [mood, setMood] = useState<OracleMood>("Classic Halloween");
   const [casting, setCasting] = useState(false);
   const [result, setResult] = useState<OracleResult | null>(null);
   const [seen, setSeen] = useState<string[]>([]);
@@ -89,7 +98,7 @@ export function Oracle() {
             <p className="text-[0.65rem] uppercase tracking-[0.34em] text-moonlight/50">
               Choose a mood
             </p>
-            <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+            <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
               {ORACLE_MOODS.map((m) => {
                 const active = mood === m.mood;
                 return (

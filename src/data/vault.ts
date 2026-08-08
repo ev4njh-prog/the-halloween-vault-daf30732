@@ -2,7 +2,8 @@ import artWitch from "@/assets/art-witch.jpg";
 import artMansion from "@/assets/art-mansion.jpg";
 import artAutumn from "@/assets/art-autumn.jpg";
 import artCartoon from "@/assets/art-cartoon.jpg";
-import { scoresOf } from "./seasonal";
+import { rankSeasonal, scoresOf } from "./seasonal";
+import { generatedCatalog, relatedIds } from "./catalog";
 
 export type VaultKind = "movie" | "episode" | "special";
 
@@ -26,6 +27,18 @@ export interface VaultTitle {
   art: string;
   categories: string[];
   decade: string;
+  /** Extra discovery signals (plot keywords, community/user tags). */
+  keywords?: string[];
+  userTags?: string[];
+  /** Franchise / series relationship used for "more like this". */
+  franchise?: string;
+  /** Internal seasonal theme id used for similar-content relationships. */
+  themeId?: string;
+  network?: string;
+  /** Remote artwork candidates, resolved through the artwork chain. */
+  posterUrl?: string | null;
+  backdropUrl?: string | null;
+
 }
 
 const art = {
@@ -710,6 +723,10 @@ for (const s of seeds) {
   });
 }
 
+/* The curated core above is the editorial spine; the generated catalog scales
+ * the Vault to platform size (thousands of movies, episodes and specials). */
+titles.push(...generatedCatalog);
+
 /* ------------------------------------------------------------------ *
  * Tag engine — seasonal discovery without relying on titles.
  * ------------------------------------------------------------------ */
@@ -754,7 +771,15 @@ const TAG_KEYWORDS: Record<VaultTag, string[]> = {
 
 /** Derives discovery tags from every text signal on a title. */
 export function tagsFor(t: VaultTitle): VaultTag[] {
-  const hay = [t.title, t.show ?? "", t.description, ...t.genres, ...t.categories]
+  const hay = [
+    t.title,
+    t.show ?? "",
+    t.description,
+    ...t.genres,
+    ...t.categories,
+    ...(t.keywords ?? []),
+    ...(t.userTags ?? []),
+  ]
     .join(" ")
     .toLowerCase();
   const found = VAULT_TAGS.filter((tag) => TAG_KEYWORDS[tag].some((k) => hay.includes(k)));
@@ -787,6 +812,9 @@ export function searchVault(query: string, pool: VaultTitle[] = titles) {
         ...t.genres,
         ...t.categories,
         ...t.cast,
+        ...(t.keywords ?? []),
+        ...(t.userTags ?? []),
+        t.franchise ?? "",
         ...getTags(t),
       ]
         .join(" ")
@@ -809,29 +837,70 @@ export function byTag(tag: VaultTag) {
 
 /* ------------------------------------------------------------------ *
  * The Halloween Oracle — mood-driven picks.
+ * Every result is drawn from the indexed library and validated before it is
+ * returned, so the Oracle can never recommend something that does not exist.
  * ------------------------------------------------------------------ */
 
-export type OracleMood = "Scary" | "Funny" | "Family" | "Cozy Fall" | "Classic" | "Animated";
+export type OracleMood =
+  | "Classic Halloween"
+  | "Family Fun"
+  | "Scary"
+  | "Supernatural"
+  | "Witchy"
+  | "Ghost Stories"
+  | "Cozy Autumn"
+  | "Harvest Season"
+  | "Animated"
+  | "Hidden Gems"
+  | "TV Episodes"
+  | "90s Halloween"
+  | "80s Halloween"
+  | "Campy Halloween"
+  | "Dark Fantasy";
 
 export const ORACLE_MOODS: { mood: OracleMood; blurb: string }[] = [
+  { mood: "Classic Halloween", blurb: "The canon of October." },
+  { mood: "Family Fun", blurb: "Spooky enough for everyone." },
   { mood: "Scary", blurb: "Lights off. Doors locked." },
-  { mood: "Funny", blurb: "Screams, but the laughing kind." },
-  { mood: "Family", blurb: "Spooky enough for everyone." },
-  { mood: "Cozy Fall", blurb: "Cider, sweaters, amber light." },
-  { mood: "Classic", blurb: "The canon of October." },
+  { mood: "Supernatural", blurb: "Things that shouldn't be here." },
+  { mood: "Witchy", blurb: "Covens, hexes and herb gardens." },
+  { mood: "Ghost Stories", blurb: "Cold rooms and patient guests." },
+  { mood: "Cozy Autumn", blurb: "Cider, sweaters, amber light." },
+  { mood: "Harvest Season", blurb: "Barns, mazes and the long table." },
   { mood: "Animated", blurb: "Cels, puppets and specials." },
+  { mood: "Hidden Gems", blurb: "Under-seen, over-qualified." },
+  { mood: "TV Episodes", blurb: "Twenty-two minutes of chaos." },
+  { mood: "90s Halloween", blurb: "VHS orange and purple." },
+  { mood: "80s Halloween", blurb: "Practical effects, real fog." },
+  { mood: "Campy Halloween", blurb: "Gloriously silly monsters." },
+  { mood: "Dark Fantasy", blurb: "Portals, prophecies, autumn kingdoms." },
 ];
 
+const hasCat = (t: VaultTitle, ...cats: string[]) =>
+  t.categories.some((c) => cats.some((x) => c.toLowerCase().includes(x.toLowerCase())));
+const hasUserTag = (t: VaultTitle, ...tags: string[]) =>
+  (t.userTags ?? []).some((x) => tags.includes(x));
+
 const MOOD_MATCH: Record<OracleMood, (t: VaultTitle) => boolean> = {
-  Scary: (t) =>
-    t.genres.includes("Horror") || t.categories.includes("Horror") || t.halloweenScore >= 92,
-  Funny: (t) => t.genres.includes("Comedy") || t.categories.includes("Halloween Comedies"),
-  Family: (t) => t.genres.includes("Family") || t.categories.some((c) => c.startsWith("Family")),
-  "Cozy Fall": (t) => t.fallScore >= 80,
-  Classic: (t) => t.year < 1995 || t.categories.includes("Classic Halloween"),
-  Animated: (t) =>
-    t.genres.includes("Animation") ||
-    t.categories.some((c) => c.includes("Animated") || c.includes("Cartoon")),
+  "Classic Halloween": (t) => hasCat(t, "Classic Halloween") || t.halloweenScore >= 92,
+  "Family Fun": (t) => t.genres.includes("Family") || hasCat(t, "Family"),
+  Scary: (t) => t.genres.includes("Horror") || hasCat(t, "Horror"),
+  Supernatural: (t) =>
+    hasUserTag(t, "Paranormal", "Ghost Story", "Magic", "Dark Fantasy") ||
+    hasCat(t, "Haunted", "Monster"),
+  Witchy: (t) => hasCat(t, "Witch") || hasUserTag(t, "Witch", "Magic"),
+  "Ghost Stories": (t) => hasUserTag(t, "Ghost Story", "Paranormal") || hasCat(t, "Haunted"),
+  "Cozy Autumn": (t) => t.fallScore >= 80 && t.halloweenScore < 80,
+  "Harvest Season": (t) => hasCat(t, "Harvest", "Thanksgiving", "Pumpkin"),
+  Animated: (t) => t.genres.includes("Animation") || hasCat(t, "Animated", "Cartoon"),
+  "Hidden Gems": (t) => hasCat(t, "Hidden Gems") || t.streaming.length <= 1,
+  "TV Episodes": (t) => t.kind === "episode",
+  "90s Halloween": (t) => t.year >= 1990 && t.year <= 1999,
+  "80s Halloween": (t) => t.year >= 1980 && t.year <= 1989,
+  "Campy Halloween": (t) =>
+    hasUserTag(t, "Campy Halloween", "Retro Halloween") ||
+    (t.genres.includes("Comedy") && t.halloweenScore >= 78),
+  "Dark Fantasy": (t) => hasUserTag(t, "Dark Fantasy", "Wizard") || hasCat(t, "Witch Movies"),
 };
 
 export interface OracleResult {
@@ -839,16 +908,34 @@ export interface OracleResult {
   reason: string;
 }
 
-/** Casts the spell: a weighted random pick with an explanation. */
+/** True only for titles that exist in the index and carry displayable metadata. */
+export function verifyTitle(t: VaultTitle | undefined): t is VaultTitle {
+  return Boolean(
+    t &&
+      titleIndex.has(t.id) &&
+      t.title?.trim() &&
+      t.description?.trim() &&
+      t.art &&
+      t.year > 1900 &&
+      t.genres.length > 0,
+  );
+}
+
+const titleIndex = new Map(titles.map((t) => [t.id, t]));
+export const getTitle = (id: string) => titleIndex.get(id);
+
+/** Casts the spell: a validated, weighted random pick with an explanation. */
 export function consultOracle(mood: OracleMood, exclude: string[] = []): OracleResult {
-  const pool = titles.filter((t) => MOOD_MATCH[mood](t) && !exclude.includes(t.id));
-  const source = pool.length ? pool : titles;
-  // Seasonal-relevance weighted draw: strong seasonal titles are far likelier,
-  // but the Oracle still surprises with lower-scored hidden gems.
-  const weights = source.map((t) => 1 + Math.pow(scoresOf(t).overall / 100, 2) * 9);
+  const match = MOOD_MATCH[mood];
+  const strict = titles.filter((t) => match(t) && verifyTitle(t) && !exclude.includes(t.id));
+  const source = strict.length ? strict : titles.filter(verifyTitle);
+
+  // Seasonal-relevance weighted draw with a variety floor, so hidden gems and
+  // deep-catalog episodes still surface instead of the same ten classics.
+  const weights = source.map((t) => 0.6 + Math.pow(scoresOf(t).overall / 100, 1.6) * 6);
   const total = weights.reduce((a, b) => a + b, 0);
   let roll = Math.random() * total;
-  let index = 0;
+  let index = Math.floor(Math.random() * source.length);
   for (let i = 0; i < source.length; i++) {
     roll -= weights[i]!;
     if (roll <= 0) {
@@ -857,17 +944,15 @@ export function consultOracle(mood: OracleMood, exclude: string[] = []): OracleR
     }
   }
   const title = source[index]!;
-  const tags = getTags(title).slice(0, 3).join(" · ");
-  const reasons: Record<OracleMood, string> = {
-    Scary: `The Oracle scored this ${title.halloweenScore}/100 on the fear meter and refuses to explain further.`,
-    Funny: `Chosen for laughs: ${title.genres.join(", ")} with a fog machine somewhere off-camera.`,
-    Family: `Safe for the whole coven — ${title.runtime}, ${title.year}, and no nightmares promised.`,
-    "Cozy Fall": `A ${title.fallScore}/100 autumn score. The crystal ball smelled like cinnamon.`,
-    Classic: `From ${title.year} — the Oracle keeps this one on the top shelf of the vault.`,
-    Animated: `Drawn, painted or puppeted. The bats voted for this one.`,
+  const tags = [...getTags(title), ...(title.userTags ?? [])].slice(0, 3).join(" · ");
+  const s = scoresOf(title);
+  const where = title.kind === "episode" ? `${title.show} · S${title.season}E${title.episode}` : `${title.year}`;
+  return {
+    title,
+    reason: `${mood}: seasonal relevance ${s.overall}/100 (Halloween ${s.halloween}, Fall ${s.fall}). ${where} · ${title.runtime} · ${title.streaming.join(", ") || "Vault archive"}. Tags: ${tags || "Halloween"}.`,
   };
-  return { title, reason: `${reasons[mood]} Tags: ${tags || "Halloween"}.` };
 }
+
 
 export interface VaultRow {
   id: string;
@@ -882,7 +967,15 @@ export interface VaultSection {
   rows: VaultRow[];
 }
 
-const by = (...cats: string[]) => titles.filter((t) => t.categories.some((c) => cats.includes(c)));
+const by = (...cats: string[]) =>
+  rankSeasonal(titles.filter((t) => t.categories.some((c) => cats.includes(c)))).slice(0, 24);
+
+const byKind = (kind: VaultKind, ...cats: string[]) =>
+  rankSeasonal(
+    titles.filter(
+      (t) => t.kind === kind && (cats.length === 0 || t.categories.some((c) => cats.includes(c))),
+    ),
+  ).slice(0, 24);
 
 export const sections: VaultSection[] = [
   {
@@ -942,6 +1035,42 @@ export const sections: VaultSection[] = [
         label: "Cartoon & Animated Specials",
         blurb: "The specials that made October feel like October.",
         items: by("Cartoon Specials", "Animated Specials"),
+      },
+      {
+        id: "anthology",
+        label: "Anthology Episodes",
+        blurb: "One story, one night, no survivors guaranteed.",
+        items: by("Anthology Episodes"),
+      },
+      {
+        id: "school-episodes",
+        label: "School & Family Halloween Episodes",
+        blurb: "Costume parades, assemblies and the fall dance.",
+        items: byKind("episode", "Family Halloween", "Sitcom Halloween Episodes"),
+      },
+      {
+        id: "harvest-episodes",
+        label: "Autumn & Harvest Episodes",
+        blurb: "Hayrides, cider contests and the long table.",
+        items: byKind("episode", "Harvest Themes", "Thanksgiving", "Cozy Autumn Movies"),
+      },
+    ],
+  },
+  {
+    id: "specials",
+    label: "Specials & Seasonal Events",
+    rows: [
+      {
+        id: "events",
+        label: "Annual Halloween Events",
+        blurb: "Spooktaculars, live tours and pumpkin nights, year by year.",
+        items: by("Seasonal Events"),
+      },
+      {
+        id: "holiday-specials",
+        label: "Holiday Specials",
+        blurb: "Broadcast in the last week of October, every October.",
+        items: by("Holiday Specials"),
       },
     ],
   },
@@ -1010,4 +1139,117 @@ export function countdownToHalloween(now = new Date()) {
     minutes: Math.max(0, Math.floor((ms % 3600000) / 60000)),
     seconds: Math.max(0, Math.floor((ms % 60000) / 1000)),
   };
+}
+
+/* ------------------------------------------------------------------ *
+ * The Halloween Calendar — a dedicated October experience.
+ * All picks are deterministic per calendar day (no hydration drift) and
+ * validated against the index before being surfaced.
+ * ------------------------------------------------------------------ */
+
+const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+
+function dayHash(d: Date, salt: string) {
+  const str = `${dayKey(d)}:${salt}`;
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) / 4294967296;
+}
+
+function pickFor(pool: VaultTitle[], d: Date, salt: string) {
+  const valid = pool.filter(verifyTitle);
+  if (!valid.length) return undefined;
+  const ranked = rankSeasonal(valid).slice(0, Math.max(20, Math.floor(valid.length * 0.25)));
+  return ranked[Math.floor(dayHash(d, salt) * ranked.length)]!;
+}
+
+export interface CalendarDay {
+  date: Date;
+  label: string;
+  halloweenPick?: VaultTitle | undefined;
+  fallPick?: VaultTitle | undefined;
+  episodePick?: VaultTitle | undefined;
+  collection: { label: string; blurb: string; items: VaultTitle[] };
+  trivia: string;
+}
+
+const TRIVIA = [
+  "Jack-o’-lanterns were originally carved from turnips — pumpkins were the New World upgrade.",
+  "The word “Halloween” is a contraction of All Hallows’ Even, the night before All Saints’ Day.",
+  "Black cats were once carried on ships for luck, not bad omens.",
+  "Trick-or-treating as we know it was popularised in North America in the 1930s and 40s.",
+  "Bobbing for apples began as a Roman harvest ritual honouring Pomona, goddess of orchards.",
+  "The first feature-length stop-motion Halloween film crews often cite is a 76-minute labour of 109,440 frames.",
+  "A “harvest moon” is simply the full moon closest to the autumn equinox.",
+  "Scarecrows appear in farming records over 3,000 years old.",
+  "Candy corn was originally called “chicken feed” when it launched in the 1880s.",
+  "Sleepy Hollow’s Headless Horseman rides from a story published in 1820.",
+  "Barmbrack, an Irish Halloween bread, hides charms that predict the eater’s year.",
+  "Orange and black got their Halloween pairing from harvest gold and the dark of winter.",
+  "The record for the heaviest pumpkin sits well over a tonne.",
+  "Anthology horror TV boomed in the 1960s because each episode could reuse one standing set.",
+  "Fog machines on classic sets used heated mineral oil long before dry ice became standard.",
+];
+
+const COLLECTION_ROTATION: { label: string; blurb: string; cats: string[] }[] = [
+  { label: "Witching Hour", blurb: "Covens, hexes and herb gardens.", cats: ["Witch Movies"] },
+  { label: "Haunted Estates", blurb: "Elegant houses with bad habits.", cats: ["Haunted Houses"] },
+  { label: "Pumpkin Season", blurb: "Patches, carving and lantern light.", cats: ["Pumpkin Season"] },
+  { label: "Cozy Autumn", blurb: "Cider, sweaters, amber light.", cats: ["Cozy Autumn Movies"] },
+  { label: "Monster Night", blurb: "Creatures, labs and fog.", cats: ["Monster Movies"] },
+  { label: "Sitcom October", blurb: "Twenty-two minutes of costume chaos.", cats: ["Sitcom Halloween Episodes"] },
+  { label: "Animated October", blurb: "Cels, puppets and specials.", cats: ["Animated Specials", "Cartoon Specials"] },
+  { label: "Harvest Table", blurb: "Barns, fairs and the long table.", cats: ["Harvest Themes", "Thanksgiving"] },
+  { label: "Hidden Gems", blurb: "Under-seen, over-qualified.", cats: ["Hidden Gems"] },
+  { label: "Anthology Night", blurb: "One story, one night.", cats: ["Anthology Episodes"] },
+];
+
+export function calendarDay(date = new Date()): CalendarDay {
+  const movies = titles.filter((t) => t.kind !== "episode");
+  const episodes = titles.filter((t) => t.kind === "episode");
+  const cozy = titles.filter((t) => t.fallScore >= 78);
+
+  const rotation =
+    COLLECTION_ROTATION[Math.floor(dayHash(date, "collection") * COLLECTION_ROTATION.length)]!;
+  const items = rankSeasonal(
+    titles.filter((t) => t.categories.some((c) => rotation.cats.includes(c))),
+  ).slice(0, 18);
+
+  return {
+    date,
+    label: date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" }),
+    halloweenPick: pickFor(movies, date, "halloween"),
+    fallPick: pickFor(cozy, date, "fall"),
+    episodePick: pickFor(episodes, date, "episode"),
+    collection: { label: rotation.label, blurb: rotation.blurb, items },
+    trivia: TRIVIA[Math.floor(dayHash(date, "trivia") * TRIVIA.length)]!,
+  };
+}
+
+/** The full October grid — every day of the month with its own pick. */
+export function octoberGrid(year = new Date().getFullYear()) {
+  return Array.from({ length: 31 }, (_, i) => {
+    const d = new Date(year, 9, i + 1);
+    return { day: i + 1, date: d, pick: pickFor(titles, d, "grid"), trivia: TRIVIA[Math.floor(dayHash(d, "trivia") * TRIVIA.length)]! };
+  });
+}
+
+/** Library statistics used across the UI. */
+export const libraryStats = () => ({
+  total: titles.length,
+  movies: titles.filter((t) => t.kind === "movie").length,
+  episodes: titles.filter((t) => t.kind === "episode").length,
+  specials: titles.filter((t) => t.kind === "special").length,
+  shows: new Set(titles.filter((t) => t.show).map((t) => t.show)).size,
+});
+
+/** Similar / franchise-related titles for a given entry. */
+export function relatedTitles(t: VaultTitle, limit = 12) {
+  return relatedIds(titles, t, limit)
+    .map((id) => titleIndex.get(id))
+    .filter(verifyTitle)
+    .slice(0, limit);
 }
