@@ -3,7 +3,7 @@ import artMansion from "@/assets/art-mansion.jpg";
 import artAutumn from "@/assets/art-autumn.jpg";
 import artCartoon from "@/assets/art-cartoon.jpg";
 import { rankSeasonal, scoresOf } from "./seasonal";
-import { generatedCatalog, relatedIds } from "./catalog";
+import { realCatalog, relatedIds } from "./library";
 
 export type VaultKind = "movie" | "episode" | "special";
 
@@ -723,9 +723,16 @@ for (const s of seeds) {
   });
 }
 
-/* The curated core above is the editorial spine; the generated catalog scales
- * the Vault to platform size (thousands of movies, episodes and specials). */
-titles.push(...generatedCatalog);
+/* The curated core above is the editorial spine. The real-content library
+ * (compact verified rows + series generators + future content sources) scales
+ * the Vault without a single fictional entry. */
+const seen = new Set(titles.map((t) => t.title.toLowerCase() + t.year));
+for (const t of realCatalog) {
+  const key = t.title.toLowerCase() + t.year;
+  if (seen.has(key)) continue;
+  seen.add(key);
+  titles.push(t);
+}
 
 /* ------------------------------------------------------------------ *
  * Tag engine — seasonal discovery without relying on titles.
