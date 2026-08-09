@@ -1083,7 +1083,7 @@ export const sections: VaultSection[] = [
   },
   {
     id: "fall",
-    label: "Fall Collection",
+    label: "The Full Fall Season",
     rows: [
       {
         id: "cozy",
@@ -1096,6 +1096,18 @@ export const sections: VaultSection[] = [
         label: "Pumpkin Season, Harvest & Thanksgiving",
         blurb: "Patches, farms and the long table at the end of fall.",
         items: by("Pumpkin Season", "Harvest Themes", "Thanksgiving"),
+      },
+      {
+        id: "thanksgiving",
+        label: "Thanksgiving & Family Gatherings",
+        blurb: "The long table, the parade, and everyone home at once.",
+        items: by("Thanksgiving", "Family Gatherings"),
+      },
+      {
+        id: "fall-cooking",
+        label: "Fall Cooking & Traditions",
+        blurb: "Kitchens, feasts and the rituals that make the season.",
+        items: by("Fall Cooking", "Autumn Traditions"),
       },
       {
         id: "romance",
