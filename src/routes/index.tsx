@@ -4,6 +4,8 @@ import heroTown from "@/assets/hero-town.jpg";
 import { HouseIntro } from "@/components/vault/HouseIntro";
 import { Atmosphere } from "@/components/vault/Atmosphere";
 import { Oracle } from "@/components/vault/Oracle";
+import { GuideHost } from "@/components/vault/GuideHost";
+import { VideoDiscovery } from "@/components/vault/VideoDiscovery";
 import { HalloweenCalendar } from "@/components/vault/Calendar";
 import { Row, TitleCard } from "@/components/vault/Row";
 import {
@@ -483,6 +485,10 @@ function VaultHome() {
           </div>
         </section>
 
+        <section className="gutter mx-auto max-w-[1400px] py-[calc(var(--space-section)*0.4)]">
+          <GuideHost />
+        </section>
+
         <Oracle />
 
         {/* ---------------- Library ---------------- */}
@@ -511,6 +517,12 @@ function VaultHome() {
             </div>
           </section>
         ))}
+
+        <div className="py-[calc(var(--space-section)*0.5)]">
+          <VideoDiscovery />
+        </div>
+
+
 
         {/* ---------------- Decades ---------------- */}
         <section

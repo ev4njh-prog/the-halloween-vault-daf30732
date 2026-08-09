@@ -82,7 +82,20 @@ export const SEASONAL_TAGS = [
   "Magical Autumn",
   "Fall Road Trip",
   "Harvest Moon",
+  // Full-fall season (September → Thanksgiving)
+  "Thanksgiving",
+  "Family Gathering",
+  "Fall Cooking",
+  "Autumn Traditions",
+  "November",
+  "September",
+  "Apple Orchard",
+  "Sweater Weather",
+  "Fall Foliage",
+  "Football Season",
+  "Friendsgiving",
 ] as const;
+
 
 export type SeasonalTag = (typeof SEASONAL_TAGS)[number];
 
@@ -154,6 +167,17 @@ const TAG_SIGNALS: Record<SeasonalTag, string[]> = {
   "Magical Autumn": ["magical", "enchanted autumn", "wondrous", "charmed", "spellbound"],
   "Fall Road Trip": ["road trip", "drive", "highway", "leaf country", "backroads"],
   "Harvest Moon": ["harvest moon", "moon", "autumn moon", "october moon"],
+  Thanksgiving: ["thanksgiving", "turkey", "friendsgiving", "gravy", "stuffing", "parade", "long table"],
+  "Family Gathering": ["family", "reunion", "relatives", "dinner", "holiday table", "home for the holidays", "gathering"],
+  "Fall Cooking": ["recipe", "cooking", "kitchen", "baking", "pie", "feast", "chef", "dinner"],
+  "Autumn Traditions": ["tradition", "annual", "school term", "homecoming", "bonfire night", "ritual"],
+  November: ["november", "late autumn", "thanksgiving", "first frost"],
+  September: ["september", "back to school", "first day", "early autumn", "equinox"],
+  "Apple Orchard": ["orchard", "apple", "cider", "apple picking", "cider mill"],
+  "Sweater Weather": ["sweater", "scarf", "chilly", "crisp air", "cozy", "fireplace"],
+  "Fall Foliage": ["foliage", "leaves", "leaf", "amber", "golden light", "new england"],
+  "Football Season": ["football", "homecoming", "varsity", "stadium", "touchdown", "season"],
+  Friendsgiving: ["friendsgiving", "potluck", "friends", "orphans", "shared dinner"],
 };
 
 /* ------------------------------------------------------------------ *
@@ -249,6 +273,17 @@ const TAG_WEIGHTS: Partial<
   "Magical Autumn": { autumn: 18, fall: 12, halloween: 8 },
   "Fall Road Trip": { fall: 18, autumn: 14, cozy: 10 },
   "Harvest Moon": { harvest: 20, autumn: 14, fall: 10 },
+  Thanksgiving: { harvest: 30, fall: 24, autumn: 16, cozy: 16 },
+  "Family Gathering": { cozy: 20, fall: 14, harvest: 10 },
+  "Fall Cooking": { cozy: 22, harvest: 18, fall: 14 },
+  "Autumn Traditions": { autumn: 20, fall: 18 },
+  November: { autumn: 20, fall: 16, harvest: 12 },
+  September: { fall: 16, autumn: 12 },
+  "Apple Orchard": { harvest: 22, fall: 18, cozy: 12 },
+  "Sweater Weather": { cozy: 24, fall: 18, autumn: 14 },
+  "Fall Foliage": { autumn: 24, fall: 18 },
+  "Football Season": { fall: 16, autumn: 10 },
+  Friendsgiving: { harvest: 20, cozy: 18, fall: 14 },
 };
 
 const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
