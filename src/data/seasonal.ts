@@ -82,7 +82,20 @@ export const SEASONAL_TAGS = [
   "Magical Autumn",
   "Fall Road Trip",
   "Harvest Moon",
+  // Full-fall season (September → Thanksgiving)
+  "Thanksgiving",
+  "Family Gathering",
+  "Fall Cooking",
+  "Autumn Traditions",
+  "November",
+  "September",
+  "Apple Orchard",
+  "Sweater Weather",
+  "Fall Foliage",
+  "Football Season",
+  "Friendsgiving",
 ] as const;
+
 
 export type SeasonalTag = (typeof SEASONAL_TAGS)[number];
 
