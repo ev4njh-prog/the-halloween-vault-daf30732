@@ -518,6 +518,12 @@ function VaultHome() {
           </section>
         ))}
 
+        <div className="py-[calc(var(--space-section)*0.5)]">
+          <VideoDiscovery />
+        </div>
+
+
+
         {/* ---------------- Decades ---------------- */}
         <section
           id="decades"
