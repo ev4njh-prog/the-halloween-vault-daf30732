@@ -153,7 +153,7 @@ function HomePage() {
 
               <div className="mt-7 flex flex-wrap items-center gap-3">
                 <a
-                  href={featured.watchUrl}
+                  href={featured.watchUrl ?? undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={spookClick}
