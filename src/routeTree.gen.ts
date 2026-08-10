@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AutumnRouteImport } from './routes/autumn'
 import { Route as HalloweenRouteImport } from './routes/halloween'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AutumnRoute = AutumnRouteImport.update({
+  id: '/autumn',
+  path: '/autumn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HalloweenRoute = HalloweenRouteImport.update({
@@ -25,27 +31,31 @@ const HalloweenRoute = HalloweenRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/autumn': typeof AutumnRoute
   '/halloween': typeof HalloweenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/autumn': typeof AutumnRoute
   '/halloween': typeof HalloweenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/autumn': typeof AutumnRoute
   '/halloween': typeof HalloweenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/halloween'
+  fullPaths: '/' | '/autumn' | '/halloween'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/halloween'
-  id: '__root__' | '/' | '/halloween'
+  to: '/' | '/autumn' | '/halloween'
+  id: '__root__' | '/' | '/autumn' | '/halloween'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AutumnRoute: typeof AutumnRoute
   HalloweenRoute: typeof HalloweenRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/autumn': {
+      id: '/autumn'
+      path: '/autumn'
+      fullPath: '/autumn'
+      preLoaderRoute: typeof AutumnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/halloween': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AutumnRoute: AutumnRoute,
   HalloweenRoute: HalloweenRoute,
 }
 export const routeTree = rootRouteImport
