@@ -2,7 +2,7 @@ import { memo, useRef } from "react";
 import { toast } from "sonner";
 import type { VaultTitle, VaultRow } from "@/data/vault";
 import { scoresOf, tagsOf } from "@/data/seasonal";
-import { artworkFallback } from "@/data/sources";
+import { artworkFallbackHandler } from "@/data/artwork";
 import { HeartIcon, PlayPumpkinIcon } from "./icons";
 import { spookClick } from "@/lib/ambience";
 import { useReveal } from "@/hooks/use-vault";
