@@ -16,6 +16,7 @@ import { Route as HalloweenRouteImport } from './routes/halloween'
 import { Route as OracleRouteImport } from './routes/oracle'
 import { Route as SpecialsRouteImport } from './routes/specials'
 import { Route as ThanksgivingRouteImport } from './routes/thanksgiving'
+import { Route as VideosRouteImport } from './routes/videos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,11 @@ const ThanksgivingRoute = ThanksgivingRouteImport.update({
   path: '/thanksgiving',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VideosRoute = VideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/oracle': typeof OracleRoute
   '/specials': typeof SpecialsRoute
   '/thanksgiving': typeof ThanksgivingRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/oracle': typeof OracleRoute
   '/specials': typeof SpecialsRoute
   '/thanksgiving': typeof ThanksgivingRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/oracle': typeof OracleRoute
   '/specials': typeof SpecialsRoute
   '/thanksgiving': typeof ThanksgivingRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/oracle'
     | '/specials'
     | '/thanksgiving'
+    | '/videos'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/oracle'
     | '/specials'
     | '/thanksgiving'
+    | '/videos'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/oracle'
     | '/specials'
     | '/thanksgiving'
+    | '/videos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   OracleRoute: typeof OracleRoute
   SpecialsRoute: typeof SpecialsRoute
   ThanksgivingRoute: typeof ThanksgivingRoute
+  VideosRoute: typeof VideosRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ThanksgivingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/videos': {
+      id: '/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof VideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   OracleRoute: OracleRoute,
   SpecialsRoute: SpecialsRoute,
   ThanksgivingRoute: ThanksgivingRoute,
+  VideosRoute: VideosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
