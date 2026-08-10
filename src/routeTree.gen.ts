@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AutumnRouteImport } from './routes/autumn'
 import { Route as HalloweenRouteImport } from './routes/halloween'
+import { Route as SpecialsRouteImport } from './routes/specials'
 import { Route as ThanksgivingRouteImport } from './routes/thanksgiving'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const HalloweenRoute = HalloweenRouteImport.update({
   path: '/halloween',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SpecialsRoute = SpecialsRouteImport.update({
+  id: '/specials',
+  path: '/specials',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ThanksgivingRoute = ThanksgivingRouteImport.update({
   id: '/thanksgiving',
   path: '/thanksgiving',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/autumn': typeof AutumnRoute
   '/halloween': typeof HalloweenRoute
+  '/specials': typeof SpecialsRoute
   '/thanksgiving': typeof ThanksgivingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/autumn': typeof AutumnRoute
   '/halloween': typeof HalloweenRoute
+  '/specials': typeof SpecialsRoute
   '/thanksgiving': typeof ThanksgivingRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,23 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/autumn': typeof AutumnRoute
   '/halloween': typeof HalloweenRoute
+  '/specials': typeof SpecialsRoute
   '/thanksgiving': typeof ThanksgivingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/autumn' | '/halloween' | '/thanksgiving'
+  fullPaths: '/' | '/autumn' | '/halloween' | '/specials' | '/thanksgiving'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/autumn' | '/halloween' | '/thanksgiving'
-  id: '__root__' | '/' | '/autumn' | '/halloween' | '/thanksgiving'
+  to: '/' | '/autumn' | '/halloween' | '/specials' | '/thanksgiving'
+  id:
+    '__root__' | '/' | '/autumn' | '/halloween' | '/specials' | '/thanksgiving'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AutumnRoute: typeof AutumnRoute
   HalloweenRoute: typeof HalloweenRoute
+  SpecialsRoute: typeof SpecialsRoute
   ThanksgivingRoute: typeof ThanksgivingRoute
 }
 
@@ -92,6 +103,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HalloweenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/specials': {
+      id: '/specials'
+      path: '/specials'
+      fullPath: '/specials'
+      preLoaderRoute: typeof SpecialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/thanksgiving': {
       id: '/thanksgiving'
       path: '/thanksgiving'
@@ -106,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AutumnRoute: AutumnRoute,
   HalloweenRoute: HalloweenRoute,
+  SpecialsRoute: SpecialsRoute,
   ThanksgivingRoute: ThanksgivingRoute,
 }
 export const routeTree = rootRouteImport
