@@ -117,7 +117,11 @@ function HomePage() {
               src={featured.art}
               alt=""
               aria-hidden
-              onError={artworkFallbackHandler({ title: featured.title, localArt: featured.art })}
+              onError={artworkFallbackHandler({
+                id: featured.id,
+                title: featured.title,
+                localArt: featured.art,
+              })}
               className="size-full object-cover opacity-45"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/25" />
