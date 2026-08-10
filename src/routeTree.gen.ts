@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AutumnRouteImport } from './routes/autumn'
+import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as GuidesRouteImport } from './routes/guides'
 import { Route as HalloweenRouteImport } from './routes/halloween'
 import { Route as OracleRouteImport } from './routes/oracle'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const AutumnRoute = AutumnRouteImport.update({
   id: '/autumn',
   path: '/autumn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuidesRoute = GuidesRouteImport.update({
@@ -62,6 +68,7 @@ const VideosRoute = VideosRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/autumn': typeof AutumnRoute
+  '/discover': typeof DiscoverRoute
   '/guides': typeof GuidesRoute
   '/halloween': typeof HalloweenRoute
   '/oracle': typeof OracleRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/autumn': typeof AutumnRoute
+  '/discover': typeof DiscoverRoute
   '/guides': typeof GuidesRoute
   '/halloween': typeof HalloweenRoute
   '/oracle': typeof OracleRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/autumn': typeof AutumnRoute
+  '/discover': typeof DiscoverRoute
   '/guides': typeof GuidesRoute
   '/halloween': typeof HalloweenRoute
   '/oracle': typeof OracleRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/autumn'
+    | '/discover'
     | '/guides'
     | '/halloween'
     | '/oracle'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/autumn'
+    | '/discover'
     | '/guides'
     | '/halloween'
     | '/oracle'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/autumn'
+    | '/discover'
     | '/guides'
     | '/halloween'
     | '/oracle'
@@ -126,6 +138,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AutumnRoute: typeof AutumnRoute
+  DiscoverRoute: typeof DiscoverRoute
   GuidesRoute: typeof GuidesRoute
   HalloweenRoute: typeof HalloweenRoute
   OracleRoute: typeof OracleRoute
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/autumn'
       fullPath: '/autumn'
       preLoaderRoute: typeof AutumnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guides': {
@@ -198,6 +218,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AutumnRoute: AutumnRoute,
+  DiscoverRoute: DiscoverRoute,
   GuidesRoute: GuidesRoute,
   HalloweenRoute: HalloweenRoute,
   OracleRoute: OracleRoute,

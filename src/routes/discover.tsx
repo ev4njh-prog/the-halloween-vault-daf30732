@@ -10,9 +10,9 @@ import { spookClick } from "@/lib/ambience";
 
 export const Route = createFileRoute("/discover")({
   validateSearch: (search: Record<string, unknown>) => ({
-    q: typeof search.q === "string" ? search.q : "",
-    tag: typeof search.tag === "string" ? search.tag : "",
-    decade: typeof search.decade === "string" ? search.decade : "",
+    q: typeof search["q"] === "string" ? search["q"] : "",
+    tag: typeof search["tag"] === "string" ? search["tag"] : "",
+    decade: typeof search["decade"] === "string" ? search["decade"] : "",
   }),
   head: () => ({
     meta: [
