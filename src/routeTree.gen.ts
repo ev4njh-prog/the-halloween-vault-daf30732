@@ -10,33 +10,154 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AutumnRouteImport } from './routes/autumn'
+import { Route as DiscoverRouteImport } from './routes/discover'
+import { Route as GuidesRouteImport } from './routes/guides'
+import { Route as HalloweenRouteImport } from './routes/halloween'
+import { Route as MyVaultRouteImport } from './routes/my-vault'
+import { Route as OracleRouteImport } from './routes/oracle'
+import { Route as SpecialsRouteImport } from './routes/specials'
+import { Route as ThanksgivingRouteImport } from './routes/thanksgiving'
+import { Route as VideosRouteImport } from './routes/videos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AutumnRoute = AutumnRouteImport.update({
+  id: '/autumn',
+  path: '/autumn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesRoute = GuidesRouteImport.update({
+  id: '/guides',
+  path: '/guides',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HalloweenRoute = HalloweenRouteImport.update({
+  id: '/halloween',
+  path: '/halloween',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyVaultRoute = MyVaultRouteImport.update({
+  id: '/my-vault',
+  path: '/my-vault',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OracleRoute = OracleRouteImport.update({
+  id: '/oracle',
+  path: '/oracle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SpecialsRoute = SpecialsRouteImport.update({
+  id: '/specials',
+  path: '/specials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThanksgivingRoute = ThanksgivingRouteImport.update({
+  id: '/thanksgiving',
+  path: '/thanksgiving',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideosRoute = VideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/autumn': typeof AutumnRoute
+  '/discover': typeof DiscoverRoute
+  '/guides': typeof GuidesRoute
+  '/halloween': typeof HalloweenRoute
+  '/my-vault': typeof MyVaultRoute
+  '/oracle': typeof OracleRoute
+  '/specials': typeof SpecialsRoute
+  '/thanksgiving': typeof ThanksgivingRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/autumn': typeof AutumnRoute
+  '/discover': typeof DiscoverRoute
+  '/guides': typeof GuidesRoute
+  '/halloween': typeof HalloweenRoute
+  '/my-vault': typeof MyVaultRoute
+  '/oracle': typeof OracleRoute
+  '/specials': typeof SpecialsRoute
+  '/thanksgiving': typeof ThanksgivingRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/autumn': typeof AutumnRoute
+  '/discover': typeof DiscoverRoute
+  '/guides': typeof GuidesRoute
+  '/halloween': typeof HalloweenRoute
+  '/my-vault': typeof MyVaultRoute
+  '/oracle': typeof OracleRoute
+  '/specials': typeof SpecialsRoute
+  '/thanksgiving': typeof ThanksgivingRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/autumn'
+    | '/discover'
+    | '/guides'
+    | '/halloween'
+    | '/my-vault'
+    | '/oracle'
+    | '/specials'
+    | '/thanksgiving'
+    | '/videos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/autumn'
+    | '/discover'
+    | '/guides'
+    | '/halloween'
+    | '/my-vault'
+    | '/oracle'
+    | '/specials'
+    | '/thanksgiving'
+    | '/videos'
+  id:
+    | '__root__'
+    | '/'
+    | '/autumn'
+    | '/discover'
+    | '/guides'
+    | '/halloween'
+    | '/my-vault'
+    | '/oracle'
+    | '/specials'
+    | '/thanksgiving'
+    | '/videos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AutumnRoute: typeof AutumnRoute
+  DiscoverRoute: typeof DiscoverRoute
+  GuidesRoute: typeof GuidesRoute
+  HalloweenRoute: typeof HalloweenRoute
+  MyVaultRoute: typeof MyVaultRoute
+  OracleRoute: typeof OracleRoute
+  SpecialsRoute: typeof SpecialsRoute
+  ThanksgivingRoute: typeof ThanksgivingRoute
+  VideosRoute: typeof VideosRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +169,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/autumn': {
+      id: '/autumn'
+      path: '/autumn'
+      fullPath: '/autumn'
+      preLoaderRoute: typeof AutumnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides': {
+      id: '/guides'
+      path: '/guides'
+      fullPath: '/guides'
+      preLoaderRoute: typeof GuidesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/halloween': {
+      id: '/halloween'
+      path: '/halloween'
+      fullPath: '/halloween'
+      preLoaderRoute: typeof HalloweenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-vault': {
+      id: '/my-vault'
+      path: '/my-vault'
+      fullPath: '/my-vault'
+      preLoaderRoute: typeof MyVaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oracle': {
+      id: '/oracle'
+      path: '/oracle'
+      fullPath: '/oracle'
+      preLoaderRoute: typeof OracleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/specials': {
+      id: '/specials'
+      path: '/specials'
+      fullPath: '/specials'
+      preLoaderRoute: typeof SpecialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/thanksgiving': {
+      id: '/thanksgiving'
+      path: '/thanksgiving'
+      fullPath: '/thanksgiving'
+      preLoaderRoute: typeof ThanksgivingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/videos': {
+      id: '/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof VideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AutumnRoute: AutumnRoute,
+  DiscoverRoute: DiscoverRoute,
+  GuidesRoute: GuidesRoute,
+  HalloweenRoute: HalloweenRoute,
+  MyVaultRoute: MyVaultRoute,
+  OracleRoute: OracleRoute,
+  SpecialsRoute: SpecialsRoute,
+  ThanksgivingRoute: ThanksgivingRoute,
+  VideosRoute: VideosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

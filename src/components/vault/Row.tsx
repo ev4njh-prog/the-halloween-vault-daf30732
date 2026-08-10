@@ -2,7 +2,7 @@ import { memo, useRef } from "react";
 import { toast } from "sonner";
 import type { VaultTitle, VaultRow } from "@/data/vault";
 import { scoresOf, tagsOf } from "@/data/seasonal";
-import { artworkFallback } from "@/data/sources";
+import { artworkFallbackHandler } from "@/data/artwork";
 import { HeartIcon, PlayPumpkinIcon } from "./icons";
 import { spookClick } from "@/lib/ambience";
 import { useReveal } from "@/hooks/use-vault";
@@ -41,7 +41,12 @@ export const TitleCard = memo(function TitleCard({
             alt={`Artwork for ${item.title}`}
             loading={priority ? "eager" : "lazy"}
             decoding="async"
-            onError={artworkFallback(item.art)}
+            onError={artworkFallbackHandler({
+              id: item.id,
+              title: item.title,
+              kind: item.kind,
+              localArt: item.art,
+            })}
             width={640}
             height={960}
             className="size-full object-cover transition-transform duration-500 will-change-transform group-hover:scale-[1.05]"
