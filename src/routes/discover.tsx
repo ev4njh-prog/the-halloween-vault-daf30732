@@ -58,7 +58,10 @@ function DiscoverPage() {
 
   const setFilter = (next: Partial<{ tag: string; decade: string }>) => {
     setPage(1);
-    void navigate({ search: (prev) => ({ ...prev, ...next }), replace: true });
+    void navigate({
+      search: (prev: { q: string; tag: string; decade: string }) => ({ ...prev, ...next }),
+      replace: true,
+    });
   };
 
   const active = Boolean(debounced.trim() || tag || decade);
